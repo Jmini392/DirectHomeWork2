@@ -1,6 +1,26 @@
 #include "Mesh.h"
 
-CCubeMesh::CCubeMesh(float w, float h, float d) {
+void CMesh::IAVinding(ID3D12GraphicsCommandList* pd3dCommandList) {
+	pd3dCommandList->IASetPrimitiveTopology(PrimitiveTopology);
+
+	pd3dCommandList->IASetVertexBuffers(0, 1, &VertexBufferView);
+	
+	pd3dCommandList->IASetIndexBuffer(&IndexBufferView);
+	pd3dCommandList->DrawIndexedInstanced(IndicesArray.size(), 1, 0, 0, 0);
+}
+
+void CMesh::CalculateLocalBoundingBox() {
+	if (VerticesArray.empty()) return;
+
+	BoundingOrientedBox::CreateFromPoints(
+		m_LocalBoundingBox,
+		VerticesArray.size(),
+		&(VerticesArray[0].vertex),
+		sizeof(CVertex)
+	);
+}
+
+CCubeMesh::CCubeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float w, float h, float d) {
 	float fHalfWidth = w * 0.5f;
 	float fHalfHeight = h * 0.5f;
 	float fHalfDepth = d * 0.5f;
@@ -15,6 +35,12 @@ CCubeMesh::CCubeMesh(float w, float h, float d) {
 		CVertex(-fHalfWidth, -fHalfHeight, +fHalfDepth), // 6
 		CVertex(+fHalfWidth, -fHalfHeight, +fHalfDepth)  // 7
 	};
+	VertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, VerticesArray.data(), sizeof(CVertex) * VerticesArray.size(),
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &VertexUploadBuffer);
+
+	VertexBufferView.BufferLocation = VertexBuffer->GetGPUVirtualAddress();
+	VertexBufferView.StrideInBytes = sizeof(CVertex);
+	VertexBufferView.SizeInBytes = sizeof(CVertex)* VerticesArray.size();
 
 	IndicesArray = {
 		0, 1, 2, 0, 2, 3, // Front face
@@ -25,22 +51,13 @@ CCubeMesh::CCubeMesh(float w, float h, float d) {
 		1, 7, 2, 1, 4, 7  // Right face
 	};
 
-	CalculateLocalBoundingBox();
-}
+	IndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, IndicesArray.data(), sizeof(UINT) * IndicesArray.size(),
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &IndexUploadBuffer);
 
-CPlaneMesh::CPlaneMesh(float w, float h) {
-	float fHalfWidth = w * 0.5f;
-	float fHalfHeight = h * 0.5f;
-	VerticesArray = {
-		CVertex(-fHalfWidth, 0, +fHalfHeight), // 0
-		CVertex(+fHalfWidth, 0, +fHalfHeight), // 1
-		CVertex(+fHalfWidth, 0, -fHalfHeight), // 2
-		CVertex(-fHalfWidth, 0, -fHalfHeight)  // 3
-	};
-	IndicesArray = {
-		0, 1, 2,
-		0, 2, 3
-	};
+	IndexBufferView.BufferLocation = IndexBuffer->GetGPUVirtualAddress();
+	IndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	IndexBufferView.SizeInBytes = sizeof(UINT) * IndicesArray.size();
+
 	CalculateLocalBoundingBox();
 }
 

@@ -4,17 +4,18 @@
 class CVertex {
 public:
 	CVertex() {}
-	CVertex(float x, float y, float z) { v.x = x; v.y = y; v.z = z; }
-	virtual ~CVertex() {}
+	CVertex(float x, float y, float z) { vertex.x = x; vertex.y = y; vertex.z = z; }
+	~CVertex() {}
 
-	XMFLOAT3 v = { 0.0f, 0.0f, 0.0f };
+	XMFLOAT3 vertex = { 0.0f, 0.0f, 0.0f };
+	XMFLOAT4 color = { 1.0f, 0.0f, 0.0f, 1.0f };
 };
 
 class CFace {
 public:
 	CFace() {}
 	CFace(CVertex v1, CVertex v2, CVertex v3) { Vertex[0] = v1; Vertex[1] = v2; Vertex[2] = v3; }
-	virtual ~CFace() {}
+	~CFace() {}
 
 	// 정점, 법선벡터
 	CVertex Vertex[3];
@@ -26,35 +27,30 @@ public:
 	CMesh() {}
 	virtual ~CMesh() {}
 
-	std::vector<CVertex> VerticesArray; // 정점 배열
-	std::vector<DWORD> IndicesArray; // 인덱스 배열
-
+	void IAVinding(ID3D12GraphicsCommandList* pd3dCommandList);
+	
 	// DirectX 바운딩 박스 객체
 	BoundingOrientedBox m_LocalBoundingBox;
-
 	// 메쉬크기 만큼 로컬 바운딩 박스 계산
-	void CalculateLocalBoundingBox() {
-		if (VerticesArray.empty()) return;
+	void CalculateLocalBoundingBox();
+protected:
+	std::vector<CVertex> VerticesArray; // 정점 배열
+	ID3D12Resource* VertexBuffer = nullptr;
+	ID3D12Resource* VertexUploadBuffer = nullptr;
+	D3D12_VERTEX_BUFFER_VIEW VertexBufferView;
 
-		BoundingOrientedBox::CreateFromPoints(
-			m_LocalBoundingBox,
-			VerticesArray.size(),
-			&(VerticesArray[0].v),
-			sizeof(CVertex)
-		);
-	}
+	std::vector<UINT> IndicesArray; // 인덱스 배열
+	ID3D12Resource* IndexBuffer = nullptr;
+	ID3D12Resource* IndexUploadBuffer = nullptr;
+	D3D12_INDEX_BUFFER_VIEW IndexBufferView;
+
+	D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 };
 
 class CCubeMesh : public CMesh {
 public:
-	CCubeMesh(float w = 4.f, float h = 4.f, float d = 4.f);
+	CCubeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float w = 4.f, float h = 4.f, float d = 4.f);
 	virtual ~CCubeMesh() {}
-};
-
-class CPlaneMesh : public CMesh {
-public:
-	CPlaneMesh(float w = 4.f, float h = 4.f);
-	virtual ~CPlaneMesh() {}
 };
 
 class CObjMesh : public CMesh {

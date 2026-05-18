@@ -15,6 +15,8 @@ public:
 	float ViewportY = 0.f; // 뷰포트의 Y 위치
 	float ViewportWidth = (float)FRAME_BUFFER_WIDTH; // 뷰포트의 너비
 	float ViewportHeight = (float)FRAME_BUFFER_HEIGHT; // 뷰포트의 높이
+	float ViewportMinDepth = 0.0f; // 뷰포트의 최소 깊이
+	float ViewportMaxDepth = 1.0f; // 뷰포트의 최대 깊이
 };
 
 class CCamera {
@@ -29,11 +31,11 @@ public:
 
 	void SetViewMatrix();
 	void SetProjMatrix();
-	void SetViewportMatrix();
+	void SetViewport();
+	void SetScissorRect();
 
-	XMFLOAT4X4 GetViewMatrix() { return ViewMatrix; }
-	XMFLOAT4X4 GetProjMatrix() { return ProjectionMatrix; }
-	XMFLOAT4X4 GetViewportMatrix() { return ViewportMatrix; }
+	void VindingMatrix(ID3D12GraphicsCommandList* pd3dCommandList);
+	void RSSetup(ID3D12GraphicsCommandList* pd3dCommandList);
 private:
 	XMFLOAT3 EYE = { 0.f, 0.f, 0.f }; // 카메라의 위치
 	XMFLOAT3 Rotation = { 0.f, 0.f, 0.f }; // 카메라의 회전
@@ -45,7 +47,8 @@ private:
 	
 	XMFLOAT4X4 ViewMatrix = Matrix4x4::Identity(); // 카메라 행렬
 	XMFLOAT4X4 ProjectionMatrix = Matrix4x4::Identity(); // 원근 투영 행렬
-	XMFLOAT4X4 ViewportMatrix = Matrix4x4::Identity(); // 뷰포트 행렬
+	D3D12_VIEWPORT Viewport; // 뷰포트
+	D3D12_RECT ScissorRect; // 시저 렉트
 
 	std::unique_ptr<CViewport> m_Viewport = nullptr; // 뷰포트 정보
 };

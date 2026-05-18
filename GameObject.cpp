@@ -13,58 +13,14 @@ void CGameObject::SetWorldMatrix() {
 	XMStoreFloat4x4(&WorldMatrix, mWorld);
 }
 
-CWall::CWall() {
-	SetType(ObjectType::WALL);
-	std::shared_ptr<CMesh> pWallMesh = std::make_shared<CCubeMesh>(2.f, 100.f, 140.f);
-	SetMesh(pWallMesh);
+void CGameObject::VindingMatrix(ID3D12GraphicsCommandList* pd3dCommandList) {
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&WorldMatrix)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 }
 
-CFloor::CFloor() {
-	SetType(ObjectType::FLOOR);
-	std::shared_ptr<CMesh> pFloorMesh = std::make_shared<CPlaneMesh>(20.f, 20.f);
-	SetMesh(pFloorMesh);
-}
-
-CItem::CItem() {
-	SetType(ObjectType::ITEM);
-	randomValue = RANDOM;
-	std::shared_ptr<CMesh> pItemMesh = std::make_shared<CCubeMesh>(1.5f, 1.5f, 1.5f);
-	SetMesh(pItemMesh);
-	if (randomValue == 0) SetColor(RGB(255, 0, 255));
-	else SetColor(RGB(0, 255, 255));
-}
-
-void CItem::Animate(float time) {
-	// 회전 애니메이션
-	float y;
-	y = GetRotation().y;
-	y += 1.f * time;
-	if (y > XM_2PI) y -= XM_2PI;
-	SetRotation(GetRotation().x, y, GetRotation().z);
-}
-
-void CItem::OnCollision(std::shared_ptr<CGameObject> pOther) {
-	if (pOther->GetType() == ObjectType::PLAYER) {
-		isdead = true;
-	}
-}
-
-void CBullet::Animate(float time) {
-	XMFLOAT3 pos = GetPosition();
-
-	// 방향 벡터를 위치에 더해서 이동
-	pos = Vector3::Add(pos, Vector3::ScalarProduct(Direction, Speed * time)); 
-	
-	CGameObject::SetPosition(pos.x, pos.y, pos.z);
-
-	// 총알이 생기고 일정거리 멀어지면 소멸 처리
-	XMFLOAT3 offset = Vector3::Subtract(pos, StartPosition);
-	if (Vector3::Length(offset) > 20.f) isdead = true;
-}
-
-void CBullet::OnCollision(std::shared_ptr<CGameObject> pOther) {
-	ObjectType otherType = pOther->GetType();
-	if (otherType == ObjectType::ENEMY || otherType == ObjectType::WALL) {
-		isdead = true;
-	}
+void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList) {
+	VindingMatrix(pd3dCommandList);
+	if (shader) shader->Render(pd3dCommandList);
+	if (mesh) mesh->IAVinding(pd3dCommandList);
 }

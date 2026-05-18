@@ -2,6 +2,10 @@
 
 CCamera::CCamera() {
 	m_Viewport = std::make_unique<CViewport>();
+	SetViewMatrix();
+	SetProjMatrix();
+	SetViewport();
+	SetScissorRect();
 }
 
 void CCamera::Move(float x, float y, float z) {
@@ -55,18 +59,33 @@ void CCamera::SetProjMatrix() {
 	XMStoreFloat4x4(&ProjectionMatrix, mProj);
 }
 
-void CCamera::SetViewportMatrix() {
-	// ´ÜÀ§ Çà·Ä·Î ÃÊ±âÈ­
-	ViewportMatrix = Matrix4x4::Identity();
+void CCamera::SetViewport() {
+	Viewport.TopLeftX = m_Viewport->ViewportX;
+	Viewport.TopLeftY = m_Viewport->ViewportY;
+	Viewport.Width = m_Viewport->ViewportWidth;
+	Viewport.Height = m_Viewport->ViewportHeight;
+	Viewport.MinDepth = m_Viewport->ViewportMinDepth;
+	Viewport.MaxDepth = m_Viewport->ViewportMaxDepth;
+}
 
-	// X ÁÂÇ¥: [-1, 1] -> [ViewportX, ViewportX + ViewportWidth]
-	ViewportMatrix._11 = m_Viewport->ViewportWidth / 2.0f;
-	ViewportMatrix._41 = m_Viewport->ViewportX + (m_Viewport->ViewportWidth / 2.0f);
+void CCamera::SetScissorRect() {
+	ScissorRect.left = m_Viewport->ViewportX;
+	ScissorRect.top = m_Viewport->ViewportY;
+	ScissorRect.right = m_Viewport->ViewportX + m_Viewport->ViewportWidth;
+	ScissorRect.bottom = m_Viewport->ViewportY + m_Viewport->ViewportHeight;
+}
 
-	// Y ÁÂÇ¥: [1, -1] -> [ViewportY, ViewportY + ViewportHeight]
-	ViewportMatrix._22 = -m_Viewport->ViewportHeight / 2.0f;
-	ViewportMatrix._42 = m_Viewport->ViewportY + (m_Viewport->ViewportHeight / 2.0f);
+void CCamera::VindingMatrix(ID3D12GraphicsCommandList* pd3dCommandList) {
+	XMFLOAT4X4 xmf4x4View;
+	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&ViewMatrix)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4View, 0);
 
-	// Z ÁÂÇ¥: [0, 1]
-	ViewportMatrix._33 = 1.0f;
+	XMFLOAT4X4 xmf4x4Projection;
+	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&ProjectionMatrix)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4Projection, 16);
+}
+
+void CCamera::RSSetup(ID3D12GraphicsCommandList* pd3dCommandList) {
+	pd3dCommandList->RSSetViewports(1, &Viewport);
+	pd3dCommandList->RSSetScissorRects(1, &ScissorRect);
 }

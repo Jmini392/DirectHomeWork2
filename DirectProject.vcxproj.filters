@@ -41,13 +41,7 @@
     <ClInclude Include="Camera.h">
       <Filter>소스 파일\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="TitleScene.h">
-      <Filter>소스 파일\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>소스 파일\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="PipeLine.h">
       <Filter>소스 파일\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Core.h">
@@ -68,11 +62,8 @@
     <ClInclude Include="targetver.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <Filter>소스 파일\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="LobbyScene.h">
-      <Filter>소스 파일\Scene</Filter>
+    <ClInclude Include="Shader.h">
+      <Filter>소스 파일\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -91,12 +82,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>소스 파일\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="PipeLine.cpp">
-      <Filter>소스 파일\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
-      <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>소스 파일\Rendering</Filter>
     </ClCompile>
@@ -112,11 +97,8 @@
     <ClCompile Include="PCH.cpp">
       <Filter>소스 파일\System</Filter>
     </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>소스 파일\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="LobbyScene.cpp">
-      <Filter>소스 파일\Scene</Filter>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,5 +113,10 @@
     <Image Include="DirectProject.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders.hlsl">
+      <Filter>소스 파일\Rendering</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
