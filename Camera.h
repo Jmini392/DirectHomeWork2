@@ -26,9 +26,9 @@ public:
 
 	void SetPosition(float x, float y, float z) { EYE = XMFLOAT3(x, y, z); }
 	void SetRotation(float x, float y, float z) { Rotation = XMFLOAT3(x, y, z); }
-	void Move(float x, float y, float z);
-	void Rotate(float x, float y, float z);
-
+	void SetPersonView(bool isFirstPerson) { isFirstPersonView = isFirstPerson; }
+	void SetTarget(float x, float y, float z) { TargetPos = XMFLOAT3(x, y, z); } 
+	
 	void SetViewMatrix();
 	void SetProjMatrix();
 	void SetViewport();
@@ -38,6 +38,7 @@ public:
 	void RSSetup(ID3D12GraphicsCommandList* pd3dCommandList);
 private:
 	XMFLOAT3 EYE = { 0.f, 0.f, 0.f }; // 카메라의 위치
+	XMFLOAT3 TargetPos = { 0.f, 0.f, 0.f }; // 카메라가 바라볼 대상의 위치
 	XMFLOAT3 Rotation = { 0.f, 0.f, 0.f }; // 카메라의 회전
 
 	XMFLOAT3 AT = {0.f, 0.f, 0.f}; // 카메라의 시선 방향 위치 벡터
@@ -51,4 +52,6 @@ private:
 	D3D12_RECT ScissorRect; // 시저 렉트
 
 	std::unique_ptr<CViewport> m_Viewport = nullptr; // 뷰포트 정보
+
+	bool isFirstPersonView = true; // 1인칭 시점 여부
 };

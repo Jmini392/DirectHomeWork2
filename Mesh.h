@@ -5,6 +5,7 @@ class CVertex {
 public:
 	CVertex() {}
 	CVertex(float x, float y, float z) { vertex.x = x; vertex.y = y; vertex.z = z; }
+	CVertex(float x, float y, float z, XMFLOAT4 col) { vertex.x = x; vertex.y = y; vertex.z = z; color = col; }
 	~CVertex() {}
 
 	XMFLOAT3 vertex = { 0.0f, 0.0f, 0.0f };
@@ -27,34 +28,34 @@ public:
 	CMesh() {}
 	virtual ~CMesh() {}
 
-	void IAVinding(ID3D12GraphicsCommandList* pd3dCommandList);
+	void IAVinding(ID3D12GraphicsCommandList* CommandList);
 	
 	// DirectX 바운딩 박스 객체
 	BoundingOrientedBox m_LocalBoundingBox;
 	// 메쉬크기 만큼 로컬 바운딩 박스 계산
 	void CalculateLocalBoundingBox();
 protected:
-	std::vector<CVertex> VerticesArray; // 정점 배열
+	std::vector<CVertex> VerticesArray = {}; // 정점 배열
 	ID3D12Resource* VertexBuffer = nullptr;
 	ID3D12Resource* VertexUploadBuffer = nullptr;
-	D3D12_VERTEX_BUFFER_VIEW VertexBufferView;
+	D3D12_VERTEX_BUFFER_VIEW VertexBufferView = {};
 
-	std::vector<UINT> IndicesArray; // 인덱스 배열
+	std::vector<UINT> IndicesArray = {}; // 인덱스 배열
 	ID3D12Resource* IndexBuffer = nullptr;
 	ID3D12Resource* IndexUploadBuffer = nullptr;
-	D3D12_INDEX_BUFFER_VIEW IndexBufferView;
+	D3D12_INDEX_BUFFER_VIEW IndexBufferView = {};
 
 	D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 };
 
 class CCubeMesh : public CMesh {
 public:
-	CCubeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float w = 4.f, float h = 4.f, float d = 4.f);
+	CCubeMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, XMFLOAT3 size = XMFLOAT3(4.f, 4.f, 4.f), XMFLOAT4 color = XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	virtual ~CCubeMesh() {}
 };
 
 class CObjMesh : public CMesh {
 public:
-	CObjMesh(const std::string& filename);
+	CObjMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, const std::string& filename, XMFLOAT4 color = XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	virtual ~CObjMesh() {}
 };

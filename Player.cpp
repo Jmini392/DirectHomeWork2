@@ -1,30 +1,27 @@
 #include "Player.h"
 #include "Scene.h"
 
-CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {
-	SetType(ObjectType::PLAYER);
-	std::shared_ptr<CMesh> pEnemyMesh = std::make_shared<CCubeMesh>(pd3dDevice, pd3dCommandList, 4.f, 4.f, 4.f);
-	SetMesh(pEnemyMesh);
-}
-
-void CPlayer::SetPosition(float x, float y, float z) {
-	CGameObject::SetPosition(x, y, z);
-	if (m_pCamera) m_pCamera->SetPosition(x, y, z);
-}
-
-void CPlayer::SetRotation(float x, float y, float z) {
-	CGameObject::SetRotation(x, y, z);
-	if (m_pCamera) m_pCamera->SetRotation(x, y, z);
-	// 회전 후 방향 벡터 업데이트
-	//XMFLOAT4X4 viewMatrix = m_pCamera->GetViewMatrix();
-	//direction = XMFLOAT3(viewMatrix._13, viewMatrix._23, viewMatrix._33);
+CPlayer::CPlayer(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+	XMFLOAT3 position, XMFLOAT3 rotation, CCamera* camera) {
+	mesh = pMesh;
+	shader = pShader;
+	m_pCamera = camera;
+	Position = position;
+	Rotation = rotation;
+	isFirstPersonView = true;
+	Type = ObjectType::PLAYER;
+	if (m_pCamera) {
+		if (m_pCamera) m_pCamera->SetPosition(position.x, position.y, position.z);
+		if (m_pCamera) m_pCamera->SetRotation(rotation.x, rotation.y, rotation.z);
+		if (m_pCamera) m_pCamera->SetPersonView(isFirstPersonView);
+	}
+	SetWorldMatrix();
 }
 
 void CPlayer::Move(int dir) {
 	if (dir == 0) return;
 	
-	// 이동 전 현재 위치 저장
-	m_PrevPosition = GetPosition();
+	m_PrevPosition = Position;
 	
 	XMFLOAT3 moveVec = direction;
 	int moveSign = dir;
@@ -34,31 +31,61 @@ void CPlayer::Move(int dir) {
 	}
 	
 	CGameObject::Move(moveVec.x * moveSign * MoveSpeed, moveVec.y * moveSign * MoveSpeed, moveVec.z * moveSign * MoveSpeed);
-	if (m_pCamera) m_pCamera->Move(moveVec.x * moveSign * MoveSpeed, moveVec.y * moveSign * MoveSpeed, moveVec.z * moveSign * MoveSpeed);
+
+	m_pCamera->SetTarget(Position.x, Position.y, Position.z);
+
+	if (isFirstPersonView) 	m_pCamera->SetPosition(Position.x, Position.y, Position.z);
+	else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+
+	m_pCamera->SetViewMatrix();
+
+	SetWorldMatrix();
 }
 
 void CPlayer::Rotate(float x, float y, float z) {
 	CGameObject::Rotate(x, y, z);
-	if (m_pCamera) m_pCamera->Rotate(x, y, z);
-	// 회전 후 방향 벡터 업데이트
-	//XMFLOAT4X4 viewMatrix = m_pCamera->GetViewMatrix();
-	//direction = XMFLOAT3(viewMatrix._13, viewMatrix._23, viewMatrix._33);
+
+	// 카메라에도 플레이어와 완전히 동일한 회전값 세팅
+	m_pCamera->SetRotation(Rotation.x, Rotation.y, Rotation.z);
+
+	float yaw = XMConvertToRadians(Rotation.y);
+	direction.x = sinf(yaw);
+	direction.y = 0.0f;
+	direction.z = cosf(yaw);
+
+	m_pCamera->SetTarget(Position.x, Position.y, Position.z);
+
+	if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
+	else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+
+	m_pCamera->SetViewMatrix();
+
+	SetWorldMatrix();
 }
 
 void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 	ObjectType otherType = pOther->GetType();
 	if (otherType == ObjectType::ENEMY) {
-		isdead = true;
+		
 	}
 	else if (otherType == ObjectType::ITEM) {
 
 	}
 	else if (otherType == ObjectType::WALL) {
-		// 벽과 충돌 시 이동하기 이전 위치로 플레이어와 카메라 롤백
-		CGameObject::SetPosition(m_PrevPosition.x, m_PrevPosition.y, m_PrevPosition.z);
-		if (m_pCamera) {
-			m_pCamera->SetPosition(m_PrevPosition.x, m_PrevPosition.y, m_PrevPosition.z);
-		}
-		SetWorldMatrix();
+		
+	}
+}
+
+void CPlayer::TransPersonView() {
+	isFirstPersonView = !isFirstPersonView;
+	if (m_pCamera) {
+		m_pCamera->SetPersonView(isFirstPersonView);
+		m_pCamera->SetRotation(Rotation.x, Rotation.y, Rotation.z);
+		m_pCamera->SetTarget(Position.x, Position.y, Position.z);
+
+		if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
+		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+
+		m_pCamera->SetViewMatrix();
 	}
 }

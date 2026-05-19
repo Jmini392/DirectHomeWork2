@@ -8,17 +8,7 @@ CCamera::CCamera() {
 	SetScissorRect();
 }
 
-void CCamera::Move(float x, float y, float z) {
-	EYE.x += x; EYE.y += y; EYE.z += z;
-	SetViewMatrix();
-}
-
-void CCamera::Rotate(float x, float y, float z) {
-	Rotation.x += x; Rotation.y += y; Rotation.z += z;
-	SetViewMatrix();
-}
-
-void CCamera::SetViewMatrix() {	
+void CCamera::SetViewMatrix() {
 	// 카메라의 회전(Rotation) 각도를 라디안으로 변환
 	float pitch = XMConvertToRadians(Rotation.x);
 	float yaw = XMConvertToRadians(Rotation.y);
@@ -27,26 +17,26 @@ void CCamera::SetViewMatrix() {
 	float fLookX = sinf(yaw) * cosf(pitch);
 	float fLookY = sinf(pitch);
 	float fLookZ = cosf(yaw) * cosf(pitch);
-
-	// LOOK벡터를 현재 위치에 더해서 바라보는 곳 갱신
-	AT.x = EYE.x + fLookX;
-	AT.y = EYE.y + fLookY;
-	AT.z = EYE.z + fLookZ;
+	
+	if (isFirstPersonView) AT = XMFLOAT3(EYE.x + fLookX, EYE.y + fLookY, EYE.z + fLookZ);
+	else AT = TargetPos;
 
 	// Look을 AT과 EYE의 차이로 설정
 	LOOK = Vector3::Subtract(AT, EYE);
-	
+
+	UP = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
 	// Right를 Look과 UP의 외적으로 설정
-	RIGHT = Vector3::CrossProduct(LOOK, UP);
-	
+	RIGHT = Vector3::CrossProduct(UP, LOOK);
+
 	// UP을 Right와 Look의 외적으로 설정
-	UP = Vector3::CrossProduct(RIGHT, LOOK);
-	
-	// Look과 Right, UP 벡터를 정규화
+	UP = Vector3::CrossProduct(LOOK, RIGHT);
+
+	// Look, Right, UP 벡터를 정규화
 	LOOK = Vector3::Normalize(LOOK);
 	RIGHT = Vector3::Normalize(RIGHT);
 	UP = Vector3::Normalize(UP);
-	
+
 	// LookAtLH 함수를 사용하여 ViewMatrix 설정
 	ViewMatrix = Matrix4x4::LookAtLH(EYE, AT, UP);
 }

@@ -25,9 +25,10 @@ public:
 	void AddGameObject(std::shared_ptr<CGameObject> pObj) { m_GameObjects.push_back(pObj); }
 	SceneType GetNextScene() override;
 private:
-	std::shared_ptr<CPlayer> m_Player;
-	std::unique_ptr<CCamera> m_Camera;
-	std::vector<std::shared_ptr<CGameObject>> m_GameObjects;
+	std::shared_ptr<CPlayer> m_Player = nullptr;
+	std::unique_ptr<CCamera> m_Camera = nullptr;
+	std::vector<std::shared_ptr<CGameObject>> m_GameObjects = {};
 	
-	POINT OldCursorPos;
+	POINT OldCursorPos = { 0, 0 };
+	bool MouseCaptured = false;
 };

@@ -54,10 +54,10 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* Device);
 	ID3D12RootSignature* GetGraphicsRootSignature();
 private:
-	std::unique_ptr<CScene> CurrentScene;
+	std::unique_ptr<CScene> CurrentScene = nullptr;
 
-	ID3D12RootSignature* m_GraphicsRootSignature;
+	ID3D12RootSignature* m_GraphicsRootSignature = nullptr;
 
-	ID3D12Device* m_Device;
-	ID3D12GraphicsCommandList* m_CommandList;
+	ID3D12Device* m_Device = nullptr;
+	ID3D12GraphicsCommandList* m_CommandList = nullptr;
 };

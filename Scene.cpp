@@ -6,7 +6,6 @@ void CSceneManager::Init(ID3D12Device* Device, ID3D12GraphicsCommandList* Comman
 	m_CommandList = CommandList;
 
 	m_GraphicsRootSignature = CreateGraphicsRootSignature(Device);
-	CommandList->SetGraphicsRootSignature(m_GraphicsRootSignature);
 
 	std::unique_ptr<CPlayScene> pPlayScene = std::make_unique<CPlayScene>();
 	ChangeScene(std::move(pPlayScene));
