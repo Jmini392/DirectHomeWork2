@@ -24,6 +24,7 @@ protected:
 	XMFLOAT3 Rotation = { 0.f, 0.f, 0.f };
 	ObjectType Type = ObjectType::NONE;
 	XMFLOAT4X4 WorldMatrix = Matrix4x4::Identity();
+	XMFLOAT4X4 ParentWorldMatrix = Matrix4x4::Identity();
 public:
 	CGameObject() {}
 	CGameObject(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
@@ -31,10 +32,11 @@ public:
 	~CGameObject() {}
 	
 	void SetWorldMatrix();
+	void SetParentWorldMatrix(const XMFLOAT4X4& parentWorldMatrix) { ParentWorldMatrix = parentWorldMatrix; }
 
 	void VindingMatrix(ID3D12GraphicsCommandList* CommandList);
 
-	void Draw(ID3D12GraphicsCommandList* CommandList);
+	virtual void Draw(ID3D12GraphicsCommandList* CommandList);
 
 	ObjectType GetType() const { return Type; }
 	virtual BoundingOrientedBox GetWorldBoundingBox() {

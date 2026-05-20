@@ -25,6 +25,13 @@ void CGameObject::SetWorldMatrix() {
 	XMMATRIX mTranslation = XMMatrixTranslation(Position.x, Position.y, Position.z);
 	// 월드 행렬 계산
 	XMMATRIX mWorld = mRotation * mTranslation;
+
+	// 부모 월드 행렬이 단위 행렬이 아닌 경우에만 곱셈 수행
+	if (ParentWorldMatrix.m[0][0] != 1.f || ParentWorldMatrix.m[1][1] != 1.f || ParentWorldMatrix.m[2][2] != 1.f) {
+		XMMATRIX mParentWorld = XMLoadFloat4x4(&ParentWorldMatrix);
+		mWorld = mWorld * mParentWorld;
+	}
+
 	// 월드 행렬을 XMFLOAT4X4로 변환하여 저장
 	XMStoreFloat4x4(&WorldMatrix, mWorld);
 }

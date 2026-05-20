@@ -32,35 +32,49 @@ void CPlayer::Move(int dir) {
 	
 	CGameObject::Move(moveVec.x * moveSign * MoveSpeed, moveVec.y * moveSign * MoveSpeed, moveVec.z * moveSign * MoveSpeed);
 
-	m_pCamera->SetTarget(Position.x, Position.y, Position.z);
+	if (m_pCamera) {
+		m_pCamera->SetTarget(Position.x, Position.y, Position.z);
 
-	if (isFirstPersonView) 	m_pCamera->SetPosition(Position.x, Position.y, Position.z);
-	else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+		if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
+		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
 
-	m_pCamera->SetViewMatrix();
+		m_pCamera->SetViewMatrix();
+	}
 
-	SetWorldMatrix();
+	SetWorldMatrix(); 
+
+	for (auto& child : m_Children) {
+		child->SetParentWorldMatrix(WorldMatrix);
+		child->SetWorldMatrix();
+	}
 }
 
 void CPlayer::Rotate(float x, float y, float z) {
 	CGameObject::Rotate(x, y, z);
 
 	// 카메라에도 플레이어와 완전히 동일한 회전값 세팅
-	m_pCamera->SetRotation(Rotation.x, Rotation.y, Rotation.z);
+	if (m_pCamera) {
+		m_pCamera->SetRotation(Rotation.x, Rotation.y, Rotation.z);
 
-	float yaw = XMConvertToRadians(Rotation.y);
-	direction.x = sinf(yaw);
-	direction.y = 0.0f;
-	direction.z = cosf(yaw);
+		float yaw = XMConvertToRadians(Rotation.y);
+		direction.x = sinf(yaw);
+		direction.y = 0.0f;
+		direction.z = cosf(yaw);
 
-	m_pCamera->SetTarget(Position.x, Position.y, Position.z);
+		m_pCamera->SetTarget(Position.x, Position.y, Position.z);
 
-	if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
-	else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+		if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
+		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
 
-	m_pCamera->SetViewMatrix();
+		m_pCamera->SetViewMatrix();
+	}
 
 	SetWorldMatrix();
+
+	for (auto& child : m_Children) {
+		child->SetParentWorldMatrix(WorldMatrix);
+		child->SetWorldMatrix();
+	}
 }
 
 void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
@@ -87,5 +101,17 @@ void CPlayer::TransPersonView() {
 		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
 
 		m_pCamera->SetViewMatrix();
+	}
+}
+
+void CPlayer::AddChild(std::shared_ptr<CGameObject> pChild) {
+	pChild->SetParentWorldMatrix(WorldMatrix);
+	m_Children.push_back(pChild);
+}
+
+void CPlayer::Draw(ID3D12GraphicsCommandList* CommandList) {
+	CGameObject::Draw(CommandList);
+	for (auto& child : m_Children) {
+		child->Draw(CommandList);
 	}
 }

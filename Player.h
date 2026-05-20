@@ -20,6 +20,12 @@ public:
 	virtual void OnCollision(std::shared_ptr<CGameObject> pOther) override;
 
 	void TransPersonView();
+
+	void AddChild(std::shared_ptr<CGameObject> pChild);
+	virtual void Draw(ID3D12GraphicsCommandList* CommandList);
+protected:
+	// 플레이어에게 부착된 자식 오브젝트들을 저장하는 리스트
+	std::vector<std::shared_ptr<CGameObject>> m_Children;
 private:
 	CCamera* m_pCamera = nullptr; // 플레이어의 카메라
 	

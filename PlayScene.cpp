@@ -17,7 +17,7 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	std::shared_ptr<CMesh> GBoxMesh = std::make_shared<CCubeMesh>(Device, CommandList,
 		XMFLOAT3(4.f, 4.f, 4.f), XMFLOAT4(0.f, 1.f, 0.f, 1.f));
 	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCubeMesh>(Device, CommandList,
-		XMFLOAT3(0.05f, 0.025f, 0.f), XMFLOAT4(1.f, 0.f, 0.f, 1.f));
+		XMFLOAT3(0.1f, 0.025f, 0.f), XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	std::shared_ptr<CMesh> RBoxMesh = std::make_shared<CCubeMesh>(Device, CommandList,
 		XMFLOAT3(4.f, 4.f, 4.f), XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	std::shared_ptr<CMesh> ObjMesh = std::make_shared<CObjMesh>(Device, CommandList,
@@ -35,10 +35,10 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	// 조준선 객체 생성
 	std::shared_ptr<CGameObject> pCrossHair1 = std::make_shared<CCrossHair>(CrossMesh, pShader,
 		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f));
-	AddGameObject(pCrossHair1);
 	std::shared_ptr<CGameObject> pCrossHair2 = std::make_shared<CCrossHair>(CrossMesh, pShader,
 		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 90.f));
-	AddGameObject(pCrossHair2);
+	m_Player->AddChild(pCrossHair1);
+	m_Player->AddChild(pCrossHair2);
 
 	// 상자 하나 띄우기	
 	std::shared_ptr<CGameObject> pBox = std::make_shared<CGameObject>(GBoxMesh, pShader,
