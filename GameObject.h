@@ -15,6 +15,7 @@ enum class ObjectType {
 	PLAYER,
 	ENEMY,
 	WALL,
+	STAIR,
 	FLOOR,
 	ITEM,
 	BULLET,
@@ -57,7 +58,7 @@ public:
 		return worldBoundingBox;
 	}
 
-	virtual void Animate(float time);
+	virtual void Animate(float time) {}
 
 	virtual void OnCollision(std::shared_ptr<CGameObject> pOther) {}
 
@@ -65,4 +66,19 @@ public:
 	void Rotate(float x, float y, float z) { Rotation.x += x; Rotation.y += y; Rotation.z += z; }
 
 	bool isdead = false;
+};
+
+class CWord : public CGameObject {
+public:
+	CWord() {}
+	CWord(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type)
+		: CGameObject(pMesh, pShader, position, rotation, type) {}
+	~CWord() {}
+	virtual void Animate(float time) override;
+private:
+	float totalTime = 0.0f;
+	float amplitude = 0.5f;  // 위아래 움직이는 폭 (진폭)
+	float frequency = 1.5f;  // 움직이는 속도 (주파수)
+	float deltaY = 0.0f;  // 현재 프레임에서의 Y축 이동량
 };

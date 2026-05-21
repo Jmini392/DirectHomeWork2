@@ -18,6 +18,7 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
 	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
 	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
+	std::shared_ptr<CMesh> StairMesh = std::make_shared<CStairMesh>(Device, CommandList);
 	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCrosshairMesh>(Device, CommandList);
 	std::shared_ptr<CMesh> BulletMesh = std::make_shared<CObjMesh>(Device, CommandList, "sphere.obj");
 	std::shared_ptr<CMesh> StartMesh = std::make_shared<CObjMesh>(Device, CommandList, "Start.obj");
@@ -50,6 +51,12 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 		XMFLOAT3(10.f, 2.f, 0.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
 	pSWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
 	AddGameObject(pSWall);
+
+	// 계단 띄우기
+	std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+		XMFLOAT3(10.f, 2.f, -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::STAIR);
+	pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+	AddGameObject(pStair);
 
 	// 바닥 평면 띄우기
 	for (int i = -5; i <= 5; i++) {
@@ -133,9 +140,7 @@ void CPlayScene::KeyboardProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, L
 				MouseCaptured = false;
 				ShowCursor(TRUE); // 커서 다시 표시
 			}
-			else {
-				exit(0);
-			}
+			else ::PostQuitMessage(0);
 			break;
 		default:
 			break;

@@ -126,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="LobbyScene.h" />
     <ClInclude Include="PlayScene.h" />
     <ClInclude Include="DirectProject.h" />
     <ClInclude Include="GameObject.h" />
@@ -141,6 +142,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="LobbyScene.cpp" />
     <ClCompile Include="PlayScene.cpp" />
     <ClCompile Include="DirectProject.cpp" />
     <ClCompile Include="GameObject.cpp" />

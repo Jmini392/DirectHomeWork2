@@ -61,6 +61,34 @@ CCubeMesh::CCubeMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandLis
 	CalculateLocalBoundingBox();
 }
 
+CStairMesh::CStairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList) {
+	VerticesArray = {
+		CVertex(-5.f, 5.f, 5.f), // 0
+		CVertex(5.f, 5.f, 5.f), // 1
+		CVertex(-5.f, -5.f, 5.f), // 2
+		CVertex(5.f, -5.f, 5.f), // 3
+		CVertex(-5.f, -5.f, -5.f), // 4
+		CVertex(5.f, -5.f, -5.f), // 5
+	};
+	VertexBuffer = ::CreateBufferResource(Device, CommandList, VerticesArray.data(), sizeof(CVertex) * VerticesArray.size(),
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &VertexUploadBuffer);
+	VertexBufferView.BufferLocation = VertexBuffer->GetGPUVirtualAddress();
+	VertexBufferView.StrideInBytes = sizeof(CVertex);
+	VertexBufferView.SizeInBytes = sizeof(CVertex) * VerticesArray.size();
+	IndicesArray = { 
+		0, 1, 2, 1, 3, 2,
+		0, 1, 4, 1, 5, 4,
+		0, 4, 2, 1, 3, 5
+	};
+	IndexBuffer = ::CreateBufferResource(Device, CommandList, IndicesArray.data(), sizeof(UINT) * IndicesArray.size(),
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &IndexUploadBuffer);
+	IndexBufferView.BufferLocation = IndexBuffer->GetGPUVirtualAddress();
+	IndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	IndexBufferView.SizeInBytes = sizeof(UINT) * IndicesArray.size();
+	CalculateLocalBoundingBox();
+}
+
+
 CCrosshairMesh::CCrosshairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList) {
 	VerticesArray = {
 		CVertex(-0.075f, 0.02f, 0.0f), // 0

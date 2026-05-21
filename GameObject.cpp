@@ -50,16 +50,10 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList) {
 	if (mesh) mesh->IAVinding(pd3dCommandList);
 }
 
-void CGameObject::Animate(float time) {
-	if (Type == ObjectType::WORD) {
-		static float totalTime = 0.0f;
-		totalTime += time;
+void CWord::Animate(float time) {
+	totalTime += time;
 
-		float amplitude = 0.5f;  // 위아래 움직이는 폭 (진폭)
-		float frequency = 1.5f;  // 움직이는 속도 (주파수)
-
-		float deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
-		Position.y += deltaY;
-		SetWorldMatrix();
-	}
+	deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
+	Position.y += deltaY;
+	SetWorldMatrix();
 }

@@ -65,6 +65,9 @@
     <ClInclude Include="Shader.h">
       <Filter>소스 파일\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="LobbyScene.h">
+      <Filter>소스 파일\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlayScene.cpp">
@@ -99,6 +102,9 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="LobbyScene.cpp">
+      <Filter>소스 파일\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

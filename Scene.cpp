@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "PlayScene.h"
+#include "LobbyScene.h"
 
 void CSceneManager::Init(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList) {
 	m_Device = Device;
@@ -7,8 +8,8 @@ void CSceneManager::Init(ID3D12Device* Device, ID3D12GraphicsCommandList* Comman
 
 	m_GraphicsRootSignature = CreateGraphicsRootSignature(Device);
 
-	std::unique_ptr<CPlayScene> pPlayScene = std::make_unique<CPlayScene>();
-	ChangeScene(std::move(pPlayScene));
+	//ChangeScene(std::make_unique<CPlayScene>());
+	ChangeScene(std::make_unique<CLobbyScene>());
 }
 
 void CSceneManager::ChangeScene(std::unique_ptr<CScene> newScene) {
@@ -26,7 +27,7 @@ void CSceneManager::Animation(float time) {
 			//ChangeScene(std::make_unique<CTitleScene>());
 			break;
 		case SceneType::LOBBY:
-			//ChangeScene(std::make_unique<CLobbyScene>());
+			ChangeScene(std::make_unique<CLobbyScene>());
 			break;
 		case SceneType::PLAY:
 			ChangeScene(std::make_unique<CPlayScene>());
