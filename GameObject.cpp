@@ -37,9 +37,11 @@ void CGameObject::SetWorldMatrix() {
 }
 
 void CGameObject::VindingMatrix(ID3D12GraphicsCommandList* pd3dCommandList) {
-	XMFLOAT4X4 xmf4x4World;
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&WorldMatrix)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+	CB_GAMEOBJECT cbGameObject;
+	XMStoreFloat4x4(&cbGameObject.WorldMatrix, XMMatrixTranspose(XMLoadFloat4x4(&WorldMatrix)));
+	cbGameObject.Color = Color;
+
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 20, &cbGameObject, 0);
 }
 
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList) {
@@ -48,12 +50,16 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList) {
 	if (mesh) mesh->IAVinding(pd3dCommandList);
 }
 
-CCrossHair::CCrossHair(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
-	XMFLOAT3 position, XMFLOAT3 rotation) {
-	mesh = pMesh;
-	shader = pShader;
-	Position = position;
-	Rotation = rotation;
-	Type = ObjectType::CROSS;
-	SetWorldMatrix();
+void CGameObject::Animate(float time) {
+	if (Type == ObjectType::WORD) {
+		static float totalTime = 0.0f;
+		totalTime += time;
+
+		float amplitude = 0.5f;  // 위아래 움직이는 폭 (진폭)
+		float frequency = 1.5f;  // 움직이는 속도 (주파수)
+
+		float deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
+		Position.y += deltaY;
+		SetWorldMatrix();
+	}
 }

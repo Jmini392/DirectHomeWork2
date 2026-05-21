@@ -5,11 +5,10 @@ class CVertex {
 public:
 	CVertex() {}
 	CVertex(float x, float y, float z) { vertex.x = x; vertex.y = y; vertex.z = z; }
-	CVertex(float x, float y, float z, XMFLOAT4 col) { vertex.x = x; vertex.y = y; vertex.z = z; color = col; }
 	~CVertex() {}
 
 	XMFLOAT3 vertex = { 0.0f, 0.0f, 0.0f };
-	XMFLOAT4 color = { 1.0f, 0.0f, 0.0f, 1.0f };
+	XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 };
 
 class CFace {
@@ -50,12 +49,18 @@ protected:
 
 class CCubeMesh : public CMesh {
 public:
-	CCubeMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, XMFLOAT3 size = XMFLOAT3(4.f, 4.f, 4.f), XMFLOAT4 color = XMFLOAT4(1.f, 0.f, 0.f, 1.f));
+	CCubeMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, XMFLOAT3 size = XMFLOAT3(4.f, 4.f, 4.f));
 	virtual ~CCubeMesh() {}
+};
+
+class CCrosshairMesh : public CMesh {
+public:
+	CCrosshairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
+	virtual ~CCrosshairMesh() {}
 };
 
 class CObjMesh : public CMesh {
 public:
-	CObjMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, const std::string& filename, XMFLOAT4 color = XMFLOAT4(1.f, 0.f, 0.f, 1.f));
+	CObjMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, const std::string& filename);
 	virtual ~CObjMesh() {}
 };

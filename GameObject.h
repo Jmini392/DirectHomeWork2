@@ -5,6 +5,11 @@
 
 class CShader;
 
+struct CB_GAMEOBJECT {
+	XMFLOAT4X4 WorldMatrix;
+	XMFLOAT4 Color;
+};
+
 enum class ObjectType {
 	NONE,
 	PLAYER,
@@ -13,7 +18,8 @@ enum class ObjectType {
 	FLOOR,
 	ITEM,
 	BULLET,
-	CROSS
+	CROSS,
+	WORD
 };
 
 class CGameObject {
@@ -23,6 +29,7 @@ protected:
 	XMFLOAT3 Position = { 0.f, 0.f, 0.f };
 	XMFLOAT3 Rotation = { 0.f, 0.f, 0.f };
 	ObjectType Type = ObjectType::NONE;
+	XMFLOAT4 Color = { 1.f, 0.f, 0.f, 1.f };
 	XMFLOAT4X4 WorldMatrix = Matrix4x4::Identity();
 	XMFLOAT4X4 ParentWorldMatrix = Matrix4x4::Identity();
 public:
@@ -31,6 +38,7 @@ public:
 		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type);
 	~CGameObject() {}
 	
+	void SetColor(const XMFLOAT4& color) { Color = color; }
 	void SetWorldMatrix();
 	void SetParentWorldMatrix(const XMFLOAT4X4& parentWorldMatrix) { ParentWorldMatrix = parentWorldMatrix; }
 
@@ -49,7 +57,7 @@ public:
 		return worldBoundingBox;
 	}
 
-	virtual void Animate(float time) {}
+	virtual void Animate(float time);
 
 	virtual void OnCollision(std::shared_ptr<CGameObject> pOther) {}
 
@@ -57,12 +65,4 @@ public:
 	void Rotate(float x, float y, float z) { Rotation.x += x; Rotation.y += y; Rotation.z += z; }
 
 	bool isdead = false;
-};
-
-class CCrossHair : public CGameObject {
-public:
-	CCrossHair() {}
-	CCrossHair(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
-		XMFLOAT3 position, XMFLOAT3 rotation);
-	~CCrossHair() {}
 };

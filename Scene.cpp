@@ -61,7 +61,7 @@ ID3D12RootSignature* CSceneManager::CreateGraphicsRootSignature(ID3D12Device* De
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 16;
+	pd3dRootParameters[0].Constants.Num32BitValues = 20;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;

@@ -1,6 +1,7 @@
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다.
 cbuffer cbGameObjectInfo : register(b0) {
     matrix gmtxWorld : packoffset(c0);
+    float4 gObjectColor : packoffset(c4);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다.
@@ -27,8 +28,8 @@ VS_OUTPUT VSDiffused(VS_INPUT input) {
     
     //정점을 변환(월드 변환, 카메라 변환, 투영 변환)한다.
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-    output.color = input.color;
-    
+    output.color = input.color * gObjectColor; //객체의 색상과 정점의 색상을 곱하여 최종 색상을 계산한다.
+   
     return (output);
 }
 

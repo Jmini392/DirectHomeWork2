@@ -36,7 +36,8 @@ void CPlayer::Move(int dir) {
 		m_pCamera->SetTarget(Position.x, Position.y, Position.z);
 
 		if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
-		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+		else m_pCamera->SetPosition(Position.x - direction.x * cameraDistance,
+			Position.y + cameraDistance / 2.f, Position.z - direction.z * cameraDistance);
 
 		m_pCamera->SetViewMatrix();
 	}
@@ -64,7 +65,8 @@ void CPlayer::Rotate(float x, float y, float z) {
 		m_pCamera->SetTarget(Position.x, Position.y, Position.z);
 
 		if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
-		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
+		else m_pCamera->SetPosition(Position.x - direction.x * cameraDistance,
+			Position.y + cameraDistance / 2.f, Position.z - direction.z * cameraDistance);
 
 		m_pCamera->SetViewMatrix();
 	}
@@ -98,8 +100,8 @@ void CPlayer::TransPersonView() {
 		m_pCamera->SetTarget(Position.x, Position.y, Position.z);
 
 		if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
-		else m_pCamera->SetPosition(Position.x - direction.x * 10.f, Position.y + 5.f, Position.z - direction.z * 10.f);
-
+		else m_pCamera->SetPosition(Position.x - direction.x * cameraDistance,
+			Position.y + cameraDistance / 2.f, Position.z - direction.z * cameraDistance);
 		m_pCamera->SetViewMatrix();
 	}
 }

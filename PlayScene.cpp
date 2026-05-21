@@ -14,36 +14,63 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	m_Camera = std::make_unique<CCamera>();
 
 	// 메쉬 생성
-	std::shared_ptr<CMesh> GBoxMesh = std::make_shared<CCubeMesh>(Device, CommandList,
-		XMFLOAT3(4.f, 4.f, 4.f), XMFLOAT4(0.f, 1.f, 0.f, 1.f));
-	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCubeMesh>(Device, CommandList,
-		XMFLOAT3(0.1f, 0.025f, 0.f), XMFLOAT4(1.f, 0.f, 0.f, 1.f));
-	std::shared_ptr<CMesh> RBoxMesh = std::make_shared<CCubeMesh>(Device, CommandList,
-		XMFLOAT3(4.f, 4.f, 4.f), XMFLOAT4(1.f, 0.f, 0.f, 1.f));
-	std::shared_ptr<CMesh> ObjMesh = std::make_shared<CObjMesh>(Device, CommandList,
-		"sphere.obj", XMFLOAT4(0.f, 0.f, 1.f, 1.f));
+	std::shared_ptr<CMesh> BoxMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(2.f, 2.f, 2.f));
+	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
+	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
+	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
+	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCrosshairMesh>(Device, CommandList);
+	std::shared_ptr<CMesh> BulletMesh = std::make_shared<CObjMesh>(Device, CommandList, "sphere.obj");
+	std::shared_ptr<CMesh> StartMesh = std::make_shared<CObjMesh>(Device, CommandList, "Start.obj");
+	std::shared_ptr<CMesh> ExitMesh = std::make_shared<CObjMesh>(Device, CommandList, "Exit.obj");
 
 	// 쉐이더 생성
 	std::shared_ptr<CShader> pShader = std::make_shared<CShader>();
 	pShader->CreateShader(Device, GraphicsRootSignature);
 
 	// 플레이어 객체 생성
-	m_Player = std::make_shared<CPlayer>(RBoxMesh, pShader,
+	m_Player = std::make_shared<CPlayer>(BoxMesh, pShader,
 		XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 0.f, 0.f), m_Camera.get());
+	m_Player->SetColor(XMFLOAT4(0.f, 0.f, 1.f, 1.f));
 	AddGameObject(m_Player);
 
 	// 조준선 객체 생성
-	std::shared_ptr<CGameObject> pCrossHair1 = std::make_shared<CCrossHair>(CrossMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f));
-	std::shared_ptr<CGameObject> pCrossHair2 = std::make_shared<CCrossHair>(CrossMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 90.f));
-	m_Player->AddChild(pCrossHair1);
-	m_Player->AddChild(pCrossHair2);
+	std::shared_ptr<CGameObject> pCrossHair = std::make_shared<CGameObject>(CrossMesh, pShader,
+		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::CROSS);
+	pCrossHair->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
+	m_Player->AddChild(pCrossHair);
 
-	// 상자 하나 띄우기	
-	std::shared_ptr<CGameObject> pBox = std::make_shared<CGameObject>(GBoxMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
-	AddGameObject(pBox);
+	// 벽 띄우기
+	std::shared_ptr<CGameObject> pWall = std::make_shared<CGameObject>(WallMesh, pShader,
+		XMFLOAT3(0.f, 2.f, 10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+	pWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
+	AddGameObject(pWall);
+
+	// 낮은 벽 띄우기
+	std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
+		XMFLOAT3(10.f, 2.f, 0.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+	pSWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
+	AddGameObject(pSWall);
+
+	// 바닥 평면 띄우기
+	for (int i = -5; i <= 5; i++) {
+		for (int j = -5; j <= 5; j++) {
+			std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
+				XMFLOAT3(i * 10.f, -2.f, j * 10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
+			pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
+			AddGameObject(pPlane);
+		}
+	}
+
+	// 시작 지점 띄우기
+	std::shared_ptr<CGameObject> pStart = std::make_shared<CGameObject>(StartMesh, pShader,
+		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+	AddGameObject(pStart);
+
+	// 종료 지점 띄우기
+	std::shared_ptr<CGameObject> pExit = std::make_shared<CGameObject>(ExitMesh, pShader,
+		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
+	AddGameObject(pExit);
 }
 
 void CPlayScene::AnimateObjects(float time) {
