@@ -275,6 +275,27 @@ void Core::FrameAdvance() {
 	
 	AnimateObjects();
 
+	SceneType nextScene = m_SceneManager.CheckNextScene();
+	if (nextScene != SceneType::NONE) {
+		// GPU 명령어 기록 준비
+		m_pd3dCommandAllocator->Reset();
+		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+
+		// 실제로 씬을 변경 (Enter -> BuildObjects 순으로 실행되며 CommandList에 메쉬 생성 기록이 남음)
+		m_SceneManager.ChangeSceneByType(nextScene);
+
+		// 기록된 명령을 닫고 GPU에 전송
+		m_pd3dCommandList->Close();
+		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+		// 애셋이 GPU 메모리에 모두 올라갈 때까지(씬 로딩 완료) 대기
+		WaitForGpuComplete();
+
+		// 이번 프레임의 렌더링은 건너뜀
+		return;
+	}
+
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 

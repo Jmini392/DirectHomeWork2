@@ -18,6 +18,7 @@ enum class ObjectType {
 	STAIR,
 	FLOOR,
 	ITEM,
+	WEAPON,
 	BULLET,
 	CROSS,
 	WORD
@@ -78,7 +79,7 @@ public:
 	virtual void Animate(float time) override;
 private:
 	float totalTime = 0.0f;
-	float amplitude = 0.5f;  // 위아래 움직이는 폭 (진폭)
-	float frequency = 1.5f;  // 움직이는 속도 (주파수)
-	float deltaY = 0.0f;  // 현재 프레임에서의 Y축 이동량
+	float amplitude = 0.25f;  // 진폭
+	float frequency = 1.5f;  // 빈도수
+	float deltaY = 0.0f;  // Y축 이동량
 };

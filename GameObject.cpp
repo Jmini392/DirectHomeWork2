@@ -52,7 +52,6 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList) {
 
 void CWord::Animate(float time) {
 	totalTime += time;
-
 	deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
 	Position.y += deltaY;
 	SetWorldMatrix();

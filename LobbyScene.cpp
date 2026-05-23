@@ -32,7 +32,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* 
 
 	// 종료 띄우기
 	std::shared_ptr<CGameObject> pExit = std::make_shared<CWord>(ExitMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+		XMFLOAT3(0.f, -1.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
 	pExit->SetColor(XMFLOAT4(0.f, 0.f, 0.f, 1.f));
 	AddGameObject(pExit);
 }
@@ -76,6 +76,13 @@ void CLobbyScene::KeyboardProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, 
 void CLobbyScene::MouseProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) {
 	switch (nMessageID) {
 	case WM_LBUTTONDOWN:
+		// 마우스 클릭 시 씬 전환
+		isSceneChanged = true;
+		SetStageNum(1); // 1번 스테이지로 설정
+		break;
+	case WM_RBUTTONDOWN:
+		isSceneChanged = true;
+		SetStageNum(2); // 2번 스테이지로 설정
 		break;
 	default:
 		break;

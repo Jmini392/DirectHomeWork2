@@ -9,18 +9,95 @@ void CPlayScene::Exit() {
 
 }
 
+void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, std::shared_ptr<CShader> pShader) {
+
+	// 맵 저장 파일 읽어오기
+	std::ifstream file;
+	if (GetStageNum() == 1) file.open("map1.txt");
+	else file.open("map2.txt");
+	if (!file.is_open()) {
+		return;
+	}
+	std::string line;
+	std::vector<std::vector<int>> mapData;
+	while (std::getline(file, line)) {
+		std::vector<int> row;
+		for (char c : line) {
+			if (c >= '0' && c <= '9') row.push_back(c - '0');
+		}
+		if (!row.empty()) mapData.push_back(row);
+	}
+
+	// 메쉬 생성
+	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
+	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
+	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
+	std::shared_ptr<CMesh> StairMesh = std::make_shared<CStairMesh>(Device, CommandList);
+	
+	// 맵 생성
+	for (int i = 0; i < mapData.size(); i++) {
+		for (int j = 0; j < mapData[i].size(); j++) {
+			XMFLOAT3 position = XMFLOAT3(j * 10.f, 3.f, i * -10.f);
+			if (mapData[i][j] == 1) {
+				std::shared_ptr<CGameObject> pWall = std::make_shared<CGameObject>(WallMesh, pShader,
+					XMFLOAT3(position.x, position.y + 5.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+				if (GetStageNum() == 1) pWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
+				else pWall->SetColor(XMFLOAT4(0.5f, 0.f, 0.f, 1.f));
+				AddGameObject(pWall);
+			}
+			else if (mapData[i][j] == 2) {
+				std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
+					position, XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+				if (GetStageNum() == 1) pSWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
+				else pSWall->SetColor(XMFLOAT4(0.5f, 0.f, 0.f, 1.f));
+				AddGameObject(pSWall);
+			}
+			else if (mapData[i][j] == 3) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					position, XMFLOAT3(0.f, 0.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 4) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					position, XMFLOAT3(0.f, 90.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 5) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					position, XMFLOAT3(0.f, 180.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 6) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					position, XMFLOAT3(0.f, -90.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else {
+				std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
+					XMFLOAT3(position.x, position.y - 5.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
+				if (GetStageNum() == 1) pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
+				else pPlane->SetColor(XMFLOAT4(1.f, 0.75f, 0.75f, 1.f));
+				AddGameObject(pPlane);
+			}
+		}
+	}
+}
+
 void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* GraphicsRootSignature) {
 	// 카메라 객체 생성
 	m_Camera = std::make_unique<CCamera>();
 
 	// 메쉬 생성
-	std::shared_ptr<CMesh> BoxMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(2.f, 2.f, 2.f));
-	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
-	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
-	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
-	std::shared_ptr<CMesh> StairMesh = std::make_shared<CStairMesh>(Device, CommandList);
+	std::shared_ptr<CMesh> PlayerMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(1.f, 2.f, 1.f));
 	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCrosshairMesh>(Device, CommandList);
-	std::shared_ptr<CMesh> BulletMesh = std::make_shared<CObjMesh>(Device, CommandList, "sphere.obj");
 	std::shared_ptr<CMesh> StartMesh = std::make_shared<CObjMesh>(Device, CommandList, "Start.obj");
 	std::shared_ptr<CMesh> ExitMesh = std::make_shared<CObjMesh>(Device, CommandList, "Exit.obj");
 
@@ -29,8 +106,8 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	pShader->CreateShader(Device, GraphicsRootSignature);
 
 	// 플레이어 객체 생성
-	m_Player = std::make_shared<CPlayer>(BoxMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 0.f, 0.f), m_Camera.get());
+	m_Player = std::make_shared<CPlayer>(PlayerMesh, pShader,
+		XMFLOAT3(60.f, 0.f, -60.f), XMFLOAT3(0.f, 0.f, 0.f), m_Camera.get());
 	m_Player->SetColor(XMFLOAT4(0.f, 0.f, 1.f, 1.f));
 	AddGameObject(m_Player);
 
@@ -40,49 +117,47 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	pCrossHair->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	m_Player->AddChild(pCrossHair);
 
-	// 벽 띄우기
-	std::shared_ptr<CGameObject> pWall = std::make_shared<CGameObject>(WallMesh, pShader,
-		XMFLOAT3(0.f, 2.f, 10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
-	pWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
-	AddGameObject(pWall);
+	// 맵 생성
+	CreateMap(Device, CommandList, pShader);
 
-	// 낮은 벽 띄우기
-	std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
-		XMFLOAT3(10.f, 2.f, 0.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
-	pSWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
-	AddGameObject(pSWall);
-
-	// 계단 띄우기
-	std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-		XMFLOAT3(10.f, 2.f, -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::STAIR);
-	pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
-	AddGameObject(pStair);
-
-	// 바닥 평면 띄우기
-	for (int i = -5; i <= 5; i++) {
-		for (int j = -5; j <= 5; j++) {
-			std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
-				XMFLOAT3(i * 10.f, -2.f, j * 10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
-			pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
-			AddGameObject(pPlane);
-		}
-	}
-
-	// 시작 지점 띄우기
-	std::shared_ptr<CGameObject> pStart = std::make_shared<CGameObject>(StartMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+	// 시작 띄우기
+	std::shared_ptr<CGameObject> pStart = std::make_shared<CWord>(StartMesh, pShader,
+		XMFLOAT3(60.f, 0.f, -58.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+	pStart->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	AddGameObject(pStart);
 
-	// 종료 지점 띄우기
-	std::shared_ptr<CGameObject> pExit = std::make_shared<CGameObject>(ExitMesh, pShader,
-		XMFLOAT3(0.f, 0.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+	// 종료 띄우기
+	std::shared_ptr<CGameObject> pExit = std::make_shared<CWord>(ExitMesh, pShader,
+		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::WORD);
 	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
 	AddGameObject(pExit);
 }
 
 void CPlayScene::AnimateObjects(float time) {
+	// 애니메이션
 	for (auto pObj : m_GameObjects) {
 		pObj->Animate(time);
+	}
+
+	// 충돌 검사
+	for (size_t i = 0; i < m_GameObjects.size(); ++i) {
+		auto& obj1 = m_GameObjects[i];
+		for (size_t j = i + 1; j < m_GameObjects.size(); ++j) {
+			auto& obj2 = m_GameObjects[j];
+			// 둘 중 하나라도 소멸 상태면 검사 제외
+			if (obj1->isdead || obj2->isdead) continue;
+			ObjectType type1 = obj1->GetType();
+			ObjectType type2 = obj2->GetType();
+			// 바닥은 모든 충돌 체크에서 제외
+			if (type1 == ObjectType::FLOOR || type2 == ObjectType::FLOOR) continue;
+			// 동족 간의 충돌 무시
+			if (type1 == type2) continue;
+			// 두 객체의 바운딩 박스 교차 검사
+			if (obj1->GetWorldBoundingBox().Intersects(obj2->GetWorldBoundingBox())) {
+				obj1->OnCollision(obj2);
+				obj2->OnCollision(obj1);
+			}
+		}
 	}
 }
 

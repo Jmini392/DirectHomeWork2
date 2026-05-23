@@ -8,8 +8,8 @@ void CSceneManager::Init(ID3D12Device* Device, ID3D12GraphicsCommandList* Comman
 
 	m_GraphicsRootSignature = CreateGraphicsRootSignature(Device);
 
-	//ChangeScene(std::make_unique<CPlayScene>());
-	ChangeScene(std::make_unique<CLobbyScene>());
+	ChangeScene(std::make_unique<CPlayScene>());
+	//ChangeScene(std::make_unique<CLobbyScene>());
 }
 
 void CSceneManager::ChangeScene(std::unique_ptr<CScene> newScene) {
@@ -17,23 +17,35 @@ void CSceneManager::ChangeScene(std::unique_ptr<CScene> newScene) {
 	if (CurrentScene) CurrentScene->Enter(m_Device, m_CommandList, m_GraphicsRootSignature);
 }
 
-void CSceneManager::Animation(float time) {
-	if (CurrentScene) CurrentScene->AnimateObjects(time);
+void CSceneManager::ChangeSceneByType(SceneType type) {
+	int nextStageNum = 1;
+	if (CurrentScene) {
+		nextStageNum = CurrentScene->GetStageNum();
+	}
+	std::unique_ptr<CScene> newScene = nullptr;
 
-	SceneType nextType = CurrentScene->GetNextScene();
-	if (nextType != SceneType::NONE) {
-		switch (nextType) {
-		case SceneType::TITLE:
-			//ChangeScene(std::make_unique<CTitleScene>());
-			break;
+	switch (type) {
 		case SceneType::LOBBY:
-			ChangeScene(std::make_unique<CLobbyScene>());
+			newScene = std::make_unique<CLobbyScene>();
 			break;
 		case SceneType::PLAY:
-			ChangeScene(std::make_unique<CPlayScene>());
+			newScene = std::make_unique<CPlayScene>();
 			break;
-		}
 	}
+
+	if (newScene) {
+		newScene->SetStageNum(nextStageNum);
+		ChangeScene(std::move(newScene));
+	}
+}
+
+SceneType CSceneManager::CheckNextScene() {
+	if (CurrentScene) return CurrentScene->GetNextScene();
+	return SceneType::NONE;
+}
+
+void CSceneManager::Animation(float time) {
+	if (CurrentScene) CurrentScene->AnimateObjects(time);
 }
 
 void CSceneManager::Rendering(ID3D12GraphicsCommandList* CommandList) {

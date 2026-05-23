@@ -27,6 +27,11 @@ public:
 	virtual void AddGameObject(std::shared_ptr<class CGameObject> pObj) {}
 
 	virtual SceneType GetNextScene() { return SceneType::NONE; }
+
+	void SetStageNum(int num) { StageNum = num; }
+	int GetStageNum() const { return StageNum; }
+private:
+	int StageNum{ 0 };
 };
 
 class CSceneManager {
@@ -38,6 +43,10 @@ public:
 	void Init(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
 	// 새로운 씬으로 전환
 	void ChangeScene(std::unique_ptr<CScene> newScene);
+	// 씬 타입으로 전환
+	void ChangeSceneByType(SceneType type);
+	// 다음 씬 타입 체크
+	SceneType CheckNextScene();
 	// 현재 씬 업데이트
 	void Animation(float time);
 	// 현재 씬 렌더링
@@ -54,6 +63,8 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* Device);
 	ID3D12RootSignature* GetGraphicsRootSignature();
 private:
+	int stageNum = 0;
+
 	std::unique_ptr<CScene> CurrentScene = nullptr;
 
 	ID3D12RootSignature* m_GraphicsRootSignature = nullptr;

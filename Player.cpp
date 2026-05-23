@@ -11,9 +11,11 @@ CPlayer::CPlayer(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
 	isFirstPersonView = true;
 	Type = ObjectType::PLAYER;
 	if (m_pCamera) {
-		if (m_pCamera) m_pCamera->SetPosition(position.x, position.y, position.z);
-		if (m_pCamera) m_pCamera->SetRotation(rotation.x, rotation.y, rotation.z);
-		if (m_pCamera) m_pCamera->SetPersonView(isFirstPersonView);
+		m_pCamera->SetPosition(position.x, position.y, position.z);
+		m_pCamera->SetRotation(rotation.x, rotation.y, rotation.z);
+		m_pCamera->SetTarget(position.x, position.y, position.z);
+		m_pCamera->SetPersonView(isFirstPersonView);		
+		m_pCamera->SetViewMatrix();
 	}
 	SetWorldMatrix();
 }
@@ -88,7 +90,36 @@ void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 
 	}
 	else if (otherType == ObjectType::WALL) {
-		
+		// 벽과 충돌하면 못	움직이도록
+	
+		Position = m_PrevPosition; // 이전 위치로 복구
+		SetWorldMatrix();
+		// 벽 위에 있을 때는 움직이도록
+	}
+	else if (otherType == ObjectType::STAIR) {
+		// 비탈길 올라갈때 비스듬히 올라가도록 Y값도 같이 이동
+		// 내려갈 때는 Y값도 같이 내려가도록
+		float deltaZ = Position.z - m_PrevPosition.z;
+		Position.y += deltaZ;
+
+		// 위치 변경 후 즉시 카메라 동기화
+		if (m_pCamera) {
+			m_pCamera->SetTarget(Position.x, Position.y, Position.z);
+
+			if (isFirstPersonView) m_pCamera->SetPosition(Position.x, Position.y, Position.z);
+			else m_pCamera->SetPosition(Position.x - direction.x * cameraDistance,
+				Position.y + cameraDistance / 2.f, Position.z - direction.z * cameraDistance);
+
+			m_pCamera->SetViewMatrix();
+		}
+
+		SetWorldMatrix();
+
+		// 자식 오브젝트 위치 동기화
+		for (auto& child : m_Children) {
+			child->SetParentWorldMatrix(WorldMatrix);
+			child->SetWorldMatrix();
+		}
 	}
 }
 

@@ -28,6 +28,7 @@ public:
 	virtual ~CMesh() {}
 
 	void IAVinding(ID3D12GraphicsCommandList* CommandList);
+	void SetBuffer(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
 	
 	// DirectX 바운딩 박스 객체
 	BoundingOrientedBox m_LocalBoundingBox;
