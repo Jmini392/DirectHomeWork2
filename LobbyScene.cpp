@@ -26,18 +26,18 @@ void CLobbyScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* 
 	pShader->CreateShader(Device, GraphicsRootSignature);
 
 	// Å¥ºê ¶ç¿ì±â
-	std::shared_ptr<CGameObject> pCube = std::make_shared<CCube>(pMesh, pShader,
+	std::shared_ptr<CGameObject> pCube = std::make_shared<CGameObject>(pMesh, pShader,
 		XMFLOAT3(2.f, 1.f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::CUBE);
 	AddGameObject(pCube);
 
 	// ½ÃÀÛ ¶ç¿ì±â
-	std::shared_ptr<CGameObject> pStart = std::make_shared<CWord>(StartMesh, pShader,
+	std::shared_ptr<CGameObject> pStart = std::make_shared<CGameObject>(StartMesh, pShader,
 		XMFLOAT3(0.f, 0.5f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::START);
 	pStart->SetColor(XMFLOAT4(0.f, 0.f, 0.f, 1.f));
 	AddGameObject(pStart);
 
 	// Á¾·á ¶ç¿ì±â
-	std::shared_ptr<CGameObject> pExit = std::make_shared<CWord>(ExitMesh, pShader,
+	std::shared_ptr<CGameObject> pExit = std::make_shared<CGameObject>(ExitMesh, pShader,
 		XMFLOAT3(0.f, -0.5f, 2.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::EXIT);
 	pExit->SetColor(XMFLOAT4(0.f, 0.f, 0.f, 1.f));
 	AddGameObject(pExit);

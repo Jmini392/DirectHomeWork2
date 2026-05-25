@@ -66,15 +66,3 @@ void CGameObject::Animate(float time) {
 		SetWorldMatrix();
 	}
 }
-
-void CCube::Animate(float time) {
-	Rotation.y += 45.f * time; // 초당 45도 회전
-	SetWorldMatrix();
-}
-
-void CWord::Animate(float time) {
-	totalTime += time;
-	deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
-	Position.y += deltaY;
-	SetWorldMatrix();
-}

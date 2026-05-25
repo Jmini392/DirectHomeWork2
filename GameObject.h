@@ -69,28 +69,3 @@ public:
 
 	bool isdead = false;
 };
-
-class CCube : public CGameObject {
-	public:
-	CCube() {}
-	CCube(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
-		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type)
-		: CGameObject(pMesh, pShader, position, rotation, type) {}
-	~CCube() {}
-	virtual void Animate(float time) override;
-};
-
-class CWord : public CGameObject {
-public:
-	CWord() {}
-	CWord(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
-		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type)
-		: CGameObject(pMesh, pShader, position, rotation, type) {}
-	~CWord() {}
-	virtual void Animate(float time) override;
-private:
-	float totalTime = 0.0f;
-	float amplitude = 0.25f;  // ÁøÆø
-	float frequency = 1.5f;  // ºóµµ¼ö
-	float deltaY = 0.0f;  // YÃà ÀÌµ¿·®
-};

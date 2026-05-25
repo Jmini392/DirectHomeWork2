@@ -66,27 +66,6 @@ CCubeMesh::CCubeMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandLis
 	CalculateLocalBoundingBox();
 }
 
-CStairMesh::CStairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList) {
-	VerticesArray = {
-		CVertex(-5.f, 5.f, 5.f), // 0
-		CVertex(5.f, 5.f, 5.f), // 1
-		CVertex(-5.f, -5.f, 5.f), // 2
-		CVertex(5.f, -5.f, 5.f), // 3
-		CVertex(-5.f, -5.f, -5.f), // 4
-		CVertex(5.f, -5.f, -5.f), // 5
-	};
-
-	IndicesArray = { 
-		0, 2, 1, 1, 2, 3,
-		0, 1, 4, 1, 5, 4,
-		0, 4, 2, 1, 3, 5
-	};
-
-	SetBuffer(Device, CommandList);
-
-	CalculateLocalBoundingBox();
-}
-
 
 CCrosshairMesh::CCrosshairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList) {
 	VerticesArray = {

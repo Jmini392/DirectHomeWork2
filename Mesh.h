@@ -54,12 +54,6 @@ public:
 	virtual ~CCubeMesh() {}
 };
 
-class CStairMesh : public CMesh {
-	public:
-	CStairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
-	virtual ~CStairMesh() {}
-};
-
 class CCrosshairMesh : public CMesh {
 public:
 	CCrosshairMesh(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);

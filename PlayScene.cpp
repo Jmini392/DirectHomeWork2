@@ -101,6 +101,7 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCrosshairMesh>(Device, CommandList);
 	std::shared_ptr<CMesh> StartMesh = std::make_shared<CObjMesh>(Device, CommandList, "Start.obj");
 	std::shared_ptr<CMesh> ExitMesh = std::make_shared<CObjMesh>(Device, CommandList, "Exit.obj");
+	std::shared_ptr<CMesh> KeyMesh = std::make_shared<CObjMesh>(Device, CommandList, "Key.obj");
 
 	// ½¦ÀÌ´õ »ý¼º
 	std::shared_ptr<CShader> pShader = std::make_shared<CShader>();
@@ -122,16 +123,22 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	CreateMap(Device, CommandList, pShader);
 
 	// ½ÃÀÛ ¶ç¿ì±â
-	std::shared_ptr<CGameObject> pStart = std::make_shared<CWord>(StartMesh, pShader,
+	std::shared_ptr<CGameObject> pStart = std::make_shared<CGameObject>(StartMesh, pShader,
 		XMFLOAT3(60.f, 0.f, -58.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::START);
 	pStart->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	AddGameObject(pStart);
 
 	// Á¾·á ¶ç¿ì±â
-	std::shared_ptr<CGameObject> pExit = std::make_shared<CWord>(ExitMesh, pShader,
+	std::shared_ptr<CGameObject> pExit = std::make_shared<CGameObject>(ExitMesh, pShader,
 		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::EXIT);
 	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
 	AddGameObject(pExit);
+
+	// ¿­¼è ¶ç¿ì±â
+	std::shared_ptr<CGameObject> pKey = std::make_shared<CGameObject>(KeyMesh, pShader,
+		XMFLOAT3(60.f, 0.f, -48.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
+	pKey->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
+	AddGameObject(pKey);
 }
 
 void CPlayScene::AnimateObjects(float time) {
