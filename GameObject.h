@@ -18,10 +18,11 @@ enum class ObjectType {
 	STAIR,
 	FLOOR,
 	ITEM,
-	WEAPON,
+	CUBE,
 	BULLET,
 	CROSS,
-	WORD
+	START,
+	EXIT
 };
 
 class CGameObject {
@@ -59,7 +60,7 @@ public:
 		return worldBoundingBox;
 	}
 
-	virtual void Animate(float time) {}
+	virtual void Animate(float time);
 
 	virtual void OnCollision(std::shared_ptr<CGameObject> pOther) {}
 
@@ -67,6 +68,16 @@ public:
 	void Rotate(float x, float y, float z) { Rotation.x += x; Rotation.y += y; Rotation.z += z; }
 
 	bool isdead = false;
+};
+
+class CCube : public CGameObject {
+	public:
+	CCube() {}
+	CCube(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type)
+		: CGameObject(pMesh, pShader, position, rotation, type) {}
+	~CCube() {}
+	virtual void Animate(float time) override;
 };
 
 class CWord : public CGameObject {

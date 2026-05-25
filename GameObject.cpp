@@ -50,6 +50,28 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList) {
 	if (mesh) mesh->IAVinding(pd3dCommandList);
 }
 
+void CGameObject::Animate(float time) {
+	if (Type == ObjectType::CUBE) {
+		Rotation.y += 45.f * time; // 초당 45도 회전
+		SetWorldMatrix();
+	}
+	else if (Type == ObjectType::START || Type == ObjectType::EXIT) {
+		static float totalTime = 0.0f;
+		totalTime += time;
+		float amplitude = 0.25f;  // 진폭
+		float frequency = 1.5f;  // 빈도수
+		float deltaY = 0.0f;
+		deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
+		Position.y += deltaY;
+		SetWorldMatrix();
+	}
+}
+
+void CCube::Animate(float time) {
+	Rotation.y += 45.f * time; // 초당 45도 회전
+	SetWorldMatrix();
+}
+
 void CWord::Animate(float time) {
 	totalTime += time;
 	deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;

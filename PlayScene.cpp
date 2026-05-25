@@ -123,13 +123,13 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 
 	// 시작 띄우기
 	std::shared_ptr<CGameObject> pStart = std::make_shared<CWord>(StartMesh, pShader,
-		XMFLOAT3(60.f, 0.f, -58.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WORD);
+		XMFLOAT3(60.f, 0.f, -58.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::START);
 	pStart->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	AddGameObject(pStart);
 
 	// 종료 띄우기
 	std::shared_ptr<CGameObject> pExit = std::make_shared<CWord>(ExitMesh, pShader,
-		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::WORD);
+		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::EXIT);
 	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
 	AddGameObject(pExit);
 }
