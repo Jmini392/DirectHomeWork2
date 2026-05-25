@@ -19,6 +19,7 @@ public:
 
 	void BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* GraphicsRootSignature);
 	void AnimateObjects(float time);
+	void CollisionCheck() {}
 	void DrawObjects(ID3D12GraphicsCommandList* CommandList) override;
 
 	void AddGameObject(std::shared_ptr<CGameObject> pObj) { m_GameObjects.push_back(pObj); }

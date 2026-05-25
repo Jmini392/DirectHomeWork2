@@ -54,6 +54,7 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_HEIGHT	600
 
 #define PI 3.14159265358979323846f
+#define ROOT2 1.41421356237309504880f
 
 inline int Random() {
 	static std::default_random_engine dre{ std::random_device{}() };

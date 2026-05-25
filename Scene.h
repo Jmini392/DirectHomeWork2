@@ -23,6 +23,7 @@ public:
 
 	virtual void BuildObjects() {}
 	virtual void AnimateObjects(float time) {}
+	virtual void CollisionCheck() {}
 	virtual void DrawObjects(ID3D12GraphicsCommandList* CommandList) {}
 	virtual void AddGameObject(std::shared_ptr<class CGameObject> pObj) {}
 

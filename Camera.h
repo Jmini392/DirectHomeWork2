@@ -28,6 +28,10 @@ public:
 	void SetRotation(float x, float y, float z) { Rotation = XMFLOAT3(x, y, z); }
 	void SetPersonView(bool isFirstPerson) { isFirstPersonView = isFirstPerson; }
 	void SetTarget(float x, float y, float z) { TargetPos = XMFLOAT3(x, y, z); } 
+
+	XMFLOAT4X4 GetViewMatrix() const { return ViewMatrix; }
+	XMFLOAT4X4 GetProjMatrix() const { return ProjectionMatrix; }
+	XMFLOAT3 GetPosition() const { return EYE; }
 	
 	void SetViewMatrix();
 	void SetProjMatrix();

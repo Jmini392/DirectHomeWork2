@@ -17,6 +17,9 @@ public:
 	void Move(int dir);
 	void Rotate(float x, float y, float z);
 
+	void UpdateLocation();
+	void Animate(float time) override;
+
 	virtual void OnCollision(std::shared_ptr<CGameObject> pOther) override;
 
 	void TransPersonView();
@@ -30,7 +33,8 @@ private:
 	CCamera* m_pCamera = nullptr; // 플레이어의 카메라
 	float cameraDistance = 5.f; // 카메라와 플레이어 사이의 거리
 
-
+	bool isfalling = false; // 낙하 여부
+	float fallSpeed = 1.f; // 낙하 속도
 	XMFLOAT3 direction = { 0.0f, 0.0f, 1.0f }; // 플레이어가 바라보는 방향
 	XMFLOAT3 m_PrevPosition = { 0.f, 0.f, 0.f }; // 충돌 시 위치 복구를 위한 이전 위치 저장
 	float MoveSpeed = 0.1f; // 이동 속도

@@ -32,7 +32,8 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
 	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
 	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
-	std::shared_ptr<CMesh> StairMesh = std::make_shared<CStairMesh>(Device, CommandList);
+	std::shared_ptr<CMesh> StairMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f * ROOT2, 10.f * ROOT2));
+	//std::shared_ptr<CMesh> StairMesh = std::make_shared<CStairMesh>(Device, CommandList);
 	
 	// 맵 생성
 	for (int i = 0; i < mapData.size(); i++) {
@@ -48,34 +49,34 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 			else if (mapData[i][j] == 2) {
 				std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
 					position, XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
-				if (GetStageNum() == 1) pSWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
-				else pSWall->SetColor(XMFLOAT4(0.5f, 0.f, 0.f, 1.f));
+				if (GetStageNum() == 1) pSWall->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pSWall->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pSWall);
 			}
 			else if (mapData[i][j] == 3) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					position, XMFLOAT3(0.f, 0.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x, position.y - 5.f, position.z + 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			else if (mapData[i][j] == 4) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					position, XMFLOAT3(0.f, 90.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x + 5.f, position.y - 5.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			else if (mapData[i][j] == 5) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					position, XMFLOAT3(0.f, 180.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x, position.y - 5.f, position.z - 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			else if (mapData[i][j] == 6) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					position, XMFLOAT3(0.f, -90.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x - 5.f, position.y - 5.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
@@ -140,6 +141,10 @@ void CPlayScene::AnimateObjects(float time) {
 	}
 
 	// 충돌 검사
+	CollisionCheck();	
+}
+
+void CPlayScene::CollisionCheck() {
 	for (size_t i = 0; i < m_GameObjects.size(); ++i) {
 		auto& obj1 = m_GameObjects[i];
 		for (size_t j = i + 1; j < m_GameObjects.size(); ++j) {
@@ -148,10 +153,14 @@ void CPlayScene::AnimateObjects(float time) {
 			if (obj1->isdead || obj2->isdead) continue;
 			ObjectType type1 = obj1->GetType();
 			ObjectType type2 = obj2->GetType();
-			// 바닥은 모든 충돌 체크에서 제외
-			if (type1 == ObjectType::FLOOR || type2 == ObjectType::FLOOR) continue;
 			// 동족 간의 충돌 무시
 			if (type1 == type2) continue;
+			// 땅과 벽은 서로 충돌 무시
+			if ((type1 == ObjectType::FLOOR && type2 == ObjectType::WALL) || (type1 == ObjectType::WALL && type2 == ObjectType::FLOOR)) continue;
+			// 벽과 계단은 서로 충돌 무시
+			if ((type1 == ObjectType::WALL && type2 == ObjectType::STAIR) || (type1 == ObjectType::STAIR && type2 == ObjectType::WALL)) continue;
+			// 계단과 땅은 서로 충돌 무시
+			if ((type1 == ObjectType::STAIR && type2 == ObjectType::FLOOR) || (type1 == ObjectType::FLOOR && type2 == ObjectType::STAIR)) continue;
 			// 두 객체의 바운딩 박스 교차 검사
 			if (obj1->GetWorldBoundingBox().Intersects(obj2->GetWorldBoundingBox())) {
 				obj1->OnCollision(obj2);

@@ -68,9 +68,6 @@
     <ClInclude Include="LobbyScene.h">
       <Filter>소스 파일\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>소스 파일\Objects</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlayScene.cpp">
@@ -108,9 +105,6 @@
     </ClCompile>
     <ClCompile Include="LobbyScene.cpp">
       <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>소스 파일\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

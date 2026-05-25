@@ -76,14 +76,48 @@ void CLobbyScene::KeyboardProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, 
 void CLobbyScene::MouseProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) {
 	switch (nMessageID) {
 	case WM_LBUTTONDOWN:
-		// 마우스 클릭 시 씬 전환
-		isSceneChanged = true;
-		SetStageNum(1); // 1번 스테이지로 설정
+	{
+		int x = LOWORD(lParam);
+		int y = HIWORD(lParam);
+
+		// 카메라 행렬 가져오기
+		XMMATRIX Proj = XMLoadFloat4x4(&camera->GetProjMatrix());
+		XMMATRIX View = XMLoadFloat4x4(&camera->GetViewMatrix());
+
+		// NDC 변환 방식을 없애고, DirectXMath에서 제공하는 XMVector3Unproject 사용을 권장합니다.
+		// 이게 훨씬 안정적이고 실수가 적습니다.
+		XMVECTOR nearPoint = XMVectorSet((float)x, (float)y, 0.0f, 1.0f);
+		XMVECTOR farPoint = XMVectorSet((float)x, (float)y, 1.0f, 1.0f);
+
+		// 카메라 Viewport 객체를 사용하지 못한다면 Frame Buffer Width와 Height로 넣어줍니다.
+		// World 행렬은 항등 행렬(Identity)을 넣으면 World 공간상 좌표가 나옵니다.
+		XMMATRIX Identity = XMMatrixIdentity();
+		
+		XMVECTOR nearWorld = XMVector3Unproject(nearPoint, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f, Proj, View, Identity);
+		XMVECTOR farWorld  = XMVector3Unproject(farPoint, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f, Proj, View, Identity);
+
+		// 광선의 방향 계산
+		XMVECTOR rayDir = XMVectorSubtract(farWorld, nearWorld);
+		rayDir = XMVector3Normalize(rayDir);
+
+		// 충돌 검사
+		for (auto& pObj : m_GameObjects) {
+			BoundingOrientedBox obb = pObj->GetWorldBoundingBox();
+			float distance = 0.0f;
+
+			if (obb.Intersects(nearWorld, rayDir, distance)) {
+				if (obb.Center.y > -0.5f) {
+					isSceneChanged = true;
+					SetStageNum(1); 
+				} else {
+					isSceneChanged = true;
+					SetStageNum(2); 
+				}
+				break;
+			}
+		}
 		break;
-	case WM_RBUTTONDOWN:
-		isSceneChanged = true;
-		SetStageNum(2); // 2번 스테이지로 설정
-		break;
+	}
 	default:
 		break;
 	}
