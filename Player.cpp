@@ -111,6 +111,7 @@ void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 	}
 	else if (otherType == ObjectType::FLOOR) {
 		isfalling = false;
+		fallSpeed = 1.f;
 		Position.y = otherTopY + 1.f;
 	}
 	else if (otherType == ObjectType::WALL) {
