@@ -103,10 +103,11 @@ void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 	float otherTopY = otherOBB.Center.y + otherOBB.Extents.y;
 
 	if (otherType == ObjectType::ENEMY) {
-	
+		isdead = true;
 	}
 	else if (otherType == ObjectType::ITEM) {
-	
+		HasKey = true;
+		pOther->isdead = true;
 	}
 	else if (otherType == ObjectType::FLOOR) {
 		isfalling = false;
@@ -206,6 +207,11 @@ void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 				UpdateLocation();
 				escapeCount++;
 			}
+		}
+	}
+	else if (otherType == ObjectType::EXIT) {
+		if (HasKey) {
+			isClear = true;
 		}
 	}
 

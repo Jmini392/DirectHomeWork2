@@ -55,7 +55,7 @@ void CGameObject::Animate(float time) {
 		Rotation.y += 45.f * time; // 초당 45도 회전
 		SetWorldMatrix();
 	}
-	else if (Type == ObjectType::START || Type == ObjectType::EXIT) {
+	else if (Type == ObjectType::START || Type == ObjectType::EXIT || Type == ObjectType::ITEM) {
 		static float totalTime = 0.0f;
 		totalTime += time;
 		float amplitude = 0.25f;  // 진폭

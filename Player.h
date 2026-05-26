@@ -30,6 +30,9 @@ public:
 	void AddChild(std::shared_ptr<CGameObject> pChild);
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return m_Children; }
 	virtual void Draw(ID3D12GraphicsCommandList* CommandList);
+
+	bool isClear = false; // 게임 클리어 여부
+
 protected:
 	std::vector<std::shared_ptr<CGameObject>> m_Children;
 private:
@@ -43,6 +46,8 @@ private:
 	float MoveSpeed = 0.1f; // 이동 속도
 
 	bool isFirstPersonView = true; // 1인칭 시점 여부
+
+	bool HasKey = false; // 열쇠 획득 여부
 
 	std::shared_ptr<CMesh> m_BulletMesh;
 	std::shared_ptr<CShader> m_BulletShader;

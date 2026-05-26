@@ -240,8 +240,15 @@ void CPlayScene::DrawObjects(ID3D12GraphicsCommandList* CommandList) {
 
 // 플레이어가 사망한 경우 로비 화면으로 전환하도록 변경
 SceneType CPlayScene::GetNextScene() {
-	if (m_Player && m_Player->isdead) {
-		return SceneType::LOBBY;
+	if (m_Player) {
+		// 사망했을 경우엔 로비로
+		if (m_Player->isdead) {
+			return SceneType::LOBBY;
+		}
+		// 클리어 조건을 달성했을 경우에도 씬 이동 처리 (LOBBY 또는 TITLE 등)
+		if (m_Player->isClear) {
+			return SceneType::LOBBY;
+		}
 	}
 	return SceneType::NONE;
 }

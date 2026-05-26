@@ -42,7 +42,4 @@ void CEnemy::OnCollision(std::shared_ptr<CGameObject> pOther) {
 	if (pOther->GetType() == ObjectType::BULLET) {
 		isdead = true;
 	}
-	else if (pOther->GetType() == ObjectType::PLAYER) {
-		pOther->isdead = true;
-	}
 }
