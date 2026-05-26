@@ -70,6 +70,20 @@ public:
 	bool isdead = false;
 };
 
+class CFloatingObject : public CGameObject {
+public:
+	CFloatingObject() {}
+	CFloatingObject(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type);
+	~CFloatingObject() {}
+	void Animate(float time) override;
+private:
+	float Amplitude = 0.25f;  // ÁøÆø
+	float Frequency = 1.5f;  // ºóµµ¼ö
+	float TotalTime = 0.0f; // ÃÑ ½Ã°£
+	float DeltaY = 0.0f; // YÃà ÀÌµ¿·®
+};
+
 class CBullet : public CGameObject {
 public:
 	CBullet() {}

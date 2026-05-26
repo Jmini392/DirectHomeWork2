@@ -55,16 +55,23 @@ void CGameObject::Animate(float time) {
 		Rotation.y += 45.f * time; // ÃÊ´ç 45µµ È¸Àü
 		SetWorldMatrix();
 	}
-	else if (Type == ObjectType::START || Type == ObjectType::EXIT || Type == ObjectType::ITEM) {
-		static float totalTime = 0.0f;
-		totalTime += time;
-		float amplitude = 0.25f;  // ÁøÆø
-		float frequency = 1.5f;  // ºóµµ¼ö
-		float deltaY = 0.0f;
-		deltaY = amplitude * frequency * cosf(frequency * totalTime) * time;
-		Position.y += deltaY;
-		SetWorldMatrix();
-	}
+}
+
+CFloatingObject::CFloatingObject(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+	XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type) {
+	mesh = pMesh;
+	shader = pShader;
+	Position = position;
+	Rotation = rotation;
+	Type = type;
+	SetWorldMatrix();
+}
+
+void CFloatingObject::Animate(float time) {
+	TotalTime += time;
+	DeltaY = Amplitude * Frequency * cosf(Frequency * TotalTime) * time;
+	Position.y += DeltaY;
+	SetWorldMatrix();
 }
 
 CBullet::CBullet(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,

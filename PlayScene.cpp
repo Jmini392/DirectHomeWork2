@@ -3,10 +3,17 @@
 void CPlayScene::Enter(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* GraphicsRootSignature) {
     // BuildObjects로 전달
 	BuildObjects(Device, CommandList, GraphicsRootSignature);
+
+	// 플레이씬에 진입 시 마우스 캡처 활성화 밑 커서 숨김
+	if (!MouseCaptured) {
+		MouseCaptured = true;
+		GetCursorPos(&OldCursorPos);
+		ShowCursor(FALSE);
+	}
 }
 
 void CPlayScene::Exit() {
-
+	
 }
 
 void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, std::shared_ptr<CShader> pShader) {
@@ -122,13 +129,13 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	CreateMap(Device, CommandList, pShader);
 
 	// 시작 띄우기
-	std::shared_ptr<CGameObject> pStart = std::make_shared<CGameObject>(StartMesh, pShader,
+	std::shared_ptr<CGameObject> pStart = std::make_shared<CFloatingObject>(StartMesh, pShader,
 		XMFLOAT3(60.f, 0.f, -58.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::START);
 	pStart->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	AddGameObject(pStart);
 
 	// 종료 띄우기
-	std::shared_ptr<CGameObject> pExit = std::make_shared<CGameObject>(ExitMesh, pShader,
+	std::shared_ptr<CGameObject> pExit = std::make_shared<CFloatingObject>(ExitMesh, pShader,
 		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::EXIT);
 	mapData[11][11] = 8;
 	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
@@ -141,7 +148,7 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 		z = FIELD_RANDOM;
 	} while (mapData[z][x] != 0);
 	mapData[z][x] = 9;
-	std::shared_ptr<CGameObject> pKey = std::make_shared<CGameObject>(KeyMesh, pShader,
+	std::shared_ptr<CGameObject> pKey = std::make_shared<CFloatingObject>(KeyMesh, pShader,
 		XMFLOAT3(x * 10.f, 0.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
 	pKey->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
 	AddGameObject(pKey);
@@ -229,7 +236,7 @@ void CPlayScene::CollisionCheck() {
 
 void CPlayScene::DrawObjects(ID3D12GraphicsCommandList* CommandList) {
 	// -----------------------------------------------------------------------------
-	// 오브젝트 그리기
+// 오브젝트 그리기
 	m_Camera->RSSetup(CommandList);
 	m_Camera->VindingMatrix(CommandList);
 
@@ -241,12 +248,15 @@ void CPlayScene::DrawObjects(ID3D12GraphicsCommandList* CommandList) {
 // 플레이어가 사망한 경우 로비 화면으로 전환하도록 변경
 SceneType CPlayScene::GetNextScene() {
 	if (m_Player) {
-		// 사망했을 경우엔 로비로
-		if (m_Player->isdead) {
-			return SceneType::LOBBY;
-		}
-		// 클리어 조건을 달성했을 경우에도 씬 이동 처리 (LOBBY 또는 TITLE 등)
-		if (m_Player->isClear) {
+		// 사망했을 경우나 클리어 조건을 달성했을 경우 로비로
+		if (m_Player->isdead || m_Player->isClear) {
+			
+			// 씬 전환이 일어나기 직전에 확실하게 마우스 포인터를 살려줍니다.
+			if (MouseCaptured) {
+				MouseCaptured = false;
+				while (ShowCursor(TRUE) < 0);
+			}
+
 			return SceneType::LOBBY;
 		}
 	}
