@@ -25,12 +25,12 @@ public:
 	void TransPersonView();
 	void SetBullet(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader);
 	void Fire();
+	void Dash(float speed);
 
 	void AddChild(std::shared_ptr<CGameObject> pChild);
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return m_Children; }
 	virtual void Draw(ID3D12GraphicsCommandList* CommandList);
 protected:
-	// 플레이어에게 부착된 자식 오브젝트들을 저장하는 리스트
 	std::vector<std::shared_ptr<CGameObject>> m_Children;
 private:
 	CCamera* m_pCamera = nullptr; // 플레이어의 카메라

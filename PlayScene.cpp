@@ -36,52 +36,52 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 	// 맵 생성
 	for (int i = 0; i < mapData.size(); i++) {
 		for (int j = 0; j < mapData[i].size(); j++) {
-			XMFLOAT3 position = XMFLOAT3(j * 10.f, 3.f, i * -10.f);
+			XMFLOAT3 position = XMFLOAT3(j * 10.f, 0.f, i * -10.f);
 			if (mapData[i][j] == 1) {
 				std::shared_ptr<CGameObject> pWall = std::make_shared<CGameObject>(WallMesh, pShader,
-					XMFLOAT3(position.x, position.y + 5.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+					XMFLOAT3(position.x, 8.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
 				if (GetStageNum() == 1) pWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
 				else pWall->SetColor(XMFLOAT4(0.5f, 0.f, 0.f, 1.f));
 				AddGameObject(pWall);
 			}
 			else if (mapData[i][j] == 2) {
 				std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
-					position, XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+					XMFLOAT3(position.x, 3.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
 				if (GetStageNum() == 1) pSWall->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pSWall->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pSWall);
 			}
 			else if (mapData[i][j] == 3) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x, position.y - 5.f, position.z + 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x, - 2.f, position.z + 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			else if (mapData[i][j] == 4) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x + 5.f, position.y - 5.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x + 5.f, - 2.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			else if (mapData[i][j] == 5) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x, position.y - 5.f, position.z - 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x, - 2.f, position.z - 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			else if (mapData[i][j] == 6) {
 				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x - 5.f, position.y - 5.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
+					XMFLOAT3(position.x - 5.f, - 2.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
 				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
 			// 바닥은 맵 전체에 깔아주기
 			std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
-				XMFLOAT3(position.x, position.y - 5.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
+				XMFLOAT3(position.x, - 2.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
 			if (GetStageNum() == 1) pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
 			else pPlane->SetColor(XMFLOAT4(1.f, 0.75f, 0.75f, 1.f));
 			AddGameObject(pPlane);
@@ -130,16 +130,23 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	// 종료 띄우기
 	std::shared_ptr<CGameObject> pExit = std::make_shared<CGameObject>(ExitMesh, pShader,
 		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::EXIT);
+	mapData[11][11] = 8;
 	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
 	AddGameObject(pExit);
 
 	// 열쇠 띄우기
+	int x, z;
+	do {
+		x = FIELD_RANDOM;
+		z = FIELD_RANDOM;
+	} while (mapData[z][x] != 0);
+	mapData[z][x] = 9;
 	std::shared_ptr<CGameObject> pKey = std::make_shared<CGameObject>(KeyMesh, pShader,
-		XMFLOAT3(60.f, 0.f, -48.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
+		XMFLOAT3(x * 10.f, 0.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
 	pKey->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
 	AddGameObject(pKey);
 
-	// 적 객체 생성
+	// 적 객체 생성 (m_Player를 타겟으로 추가 전달)
 	for (int i = 0; i < 5; i++) {
 		// 적은 맵데이터의 0 위치에서 랜덤하게 생성
 		int x, z;
@@ -147,8 +154,9 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 			x = FIELD_RANDOM;
 			z = FIELD_RANDOM;
 		} while (mapData[z][x] != 0);
+		mapData[z][x] = 7;
 		std::shared_ptr<CGameObject> pEnemy = std::make_shared<CEnemy>(PlayerMesh, pShader,
-			XMFLOAT3(x * 10.f, 0.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ENEMY);
+			XMFLOAT3(x * 10.f, -1.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ENEMY, m_Player);
 		pEnemy->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
 		AddGameObject(pEnemy);
 	}
@@ -161,7 +169,16 @@ void CPlayScene::AnimateObjects(float time) {
 	}
 
 	// 충돌 검사
-	CollisionCheck();	
+	CollisionCheck();
+
+	// 소멸된 객체 제거
+	m_GameObjects.erase(
+		std::remove_if(m_GameObjects.begin(), m_GameObjects.end(),
+			[](const std::shared_ptr<CGameObject>& obj) {
+				return obj->isdead;
+			}),
+		m_GameObjects.end()
+	);
 }
 
 void CPlayScene::CollisionCheck() {
@@ -221,7 +238,11 @@ void CPlayScene::DrawObjects(ID3D12GraphicsCommandList* CommandList) {
 	}
 }
 
+// 플레이어가 사망한 경우 로비 화면으로 전환하도록 변경
 SceneType CPlayScene::GetNextScene() {
+	if (m_Player && m_Player->isdead) {
+		return SceneType::LOBBY;
+	}
 	return SceneType::NONE;
 }
 
@@ -259,7 +280,7 @@ void CPlayScene::KeyboardProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, L
 			m_Player->TransPersonView();
 			break;
 		case VK_SHIFT:
-			m_Player->Fire();
+			m_Player->Dash(0.3f);
 			break;
 		case VK_ESCAPE:
 			// ESC 키를 누르면 캡처를 풀도록 변경 (선택사항)
@@ -273,6 +294,11 @@ void CPlayScene::KeyboardProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, L
 			break;
 		}
 		break;
+		case WM_KEYUP:
+			if (wParam == VK_SHIFT) {
+				m_Player->Dash(0.1f);
+			}
+			break;
 	default:
 		break;
 	}
@@ -284,8 +310,12 @@ void CPlayScene::MouseProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, LPAR
 		// 화면을 클릭했을 때 마우스 캡처 시작
 		if (!MouseCaptured) {
 			MouseCaptured = true;
-			GetCursorPos(&OldCursorPos); // 현재 클릭한 위치를 중앙/기준점으로 설정
-			ShowCursor(FALSE); // 마우스 캡처와 함께 시스템 커서를 숨김 (선택사항)
+			GetCursorPos(&OldCursorPos);
+			ShowCursor(FALSE);
+		}
+		// 캡처 상태에서만 발사
+		if (MouseCaptured) {
+			m_Player->Fire();
 		}
 		break;
 	case WM_LBUTTONUP:

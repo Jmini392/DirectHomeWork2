@@ -59,7 +59,6 @@ void CPlayer::Move(int dir) {
 void CPlayer::Rotate(float x, float y, float z) {
 	CGameObject::Rotate(x, y, z);
 
-	// 카메라에도 플레이어와 완전히 동일한 회전값 세팅
 	if (m_pCamera) {
 		m_pCamera->SetRotation(Rotation.x, Rotation.y, Rotation.z);
 
@@ -74,7 +73,7 @@ void CPlayer::Rotate(float x, float y, float z) {
 void CPlayer::Animate(float time) {
 	if (isfalling) {
 		Position.y -= fallSpeed * time;
-		fallSpeed += 9.8f * time; // 중력 가속도 적용
+		fallSpeed += 9.8f * time;
 	}
 
 	for (auto& child : m_Children) {
@@ -110,43 +109,52 @@ void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 	
 	}
 	else if (otherType == ObjectType::FLOOR) {
-		XMVECTOR rayOrigin = XMLoadFloat3(&Position);
-		rayOrigin = XMVectorSetY(rayOrigin, playerFootY + 1.0f);
-		XMVECTOR rayDir = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-		float dist = 0.0f;
-
-		if (otherOBB.Intersects(rayOrigin, rayDir, dist)) {
-			float hitY = XMVectorGetY(rayOrigin) - dist;
-			float heightDiff = hitY - playerFootY;
-
-			// 바닥 위에 서 있거나 살짝 파고든 경우 (높이 차 허용 범위)
-			if (heightDiff > -1.0f && heightDiff <= 1.0f) {
-				Position.y = hitY + 1.f; // 실제 부딪힌 바닥면 기준 + 내 발 높이(1.f)
-				isfalling = false;
-				fallSpeed = 1.f;
-			}
-		}
+		isfalling = false;
+		Position.y = otherTopY + 1.f;
 	}
 	else if (otherType == ObjectType::WALL) {
-		// OBB 교차를 넘어, 레이로 발 밑 지지 확인
 		XMVECTOR rayOrigin = XMLoadFloat3(&Position);
 		rayOrigin = XMVectorSetY(rayOrigin, playerFootY + 1.0f);
 		XMVECTOR rayDir = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
 		float dist = 0.0f;
+		
+		bool isSideCollision = false;
 
 		if (otherOBB.Intersects(rayOrigin, rayDir, dist)) {
 			float hitY = XMVectorGetY(rayOrigin) - dist;
 			float heightDiff = hitY - playerFootY;
-			
-			// 벽 위를 확실히 밟음
 			if (heightDiff > -1.0f && heightDiff <= 1.0f) { 
 				Position.y = otherTopY + 1.f;
 				isfalling = false;
 				fallSpeed = 1.f;
 			}
-			// 벽 옆면에 부딪힘
 			else if (heightDiff > 1.0f) {
-				Position = m_PrevPosition;
+				isSideCollision = true;
+			}
+		}
+		else {
+			if (playerFootY < otherTopY - 1.5f) {
+				isSideCollision = true;
+			}
+		}
+
+		if (isSideCollision) {
+			Position = m_PrevPosition;
+			UpdateLocation();
+			int escapeCount = 0;
+			while (otherOBB.Intersects(GetWorldBoundingBox()) && escapeCount < 10) {
+				XMVECTOR wallCenter = XMLoadFloat3(&otherOBB.Center);
+				XMVECTOR playerPos = XMLoadFloat3(&Position);
+				
+				XMVECTOR pushDir = XMVectorSubtract(playerPos, wallCenter);
+				pushDir = XMVectorSetY(pushDir, 0.0f);
+				if (XMVectorGetX(XMVector3LengthSq(pushDir)) < 0.0001f) pushDir = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+				else  pushDir = XMVector3Normalize(pushDir);
+				
+				playerPos = XMVectorAdd(playerPos, XMVectorScale(pushDir, 0.2f));
+				XMStoreFloat3(&Position, playerPos);
+				UpdateLocation();
+				escapeCount++;
 			}
 		}
 	}
@@ -156,27 +164,47 @@ void CPlayer::OnCollision(std::shared_ptr<CGameObject> pOther) {
 		XMVECTOR rayDir = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
 
 		float dist = 0.0f;
+		bool isSideCollision = false;
 
 		if (otherOBB.Intersects(rayOrigin, rayDir, dist)) {
 			float hitY = XMVectorGetY(rayOrigin) - dist;
 			float heightDiff = hitY - playerFootY;
 			const float MAX_STEP_HEIGHT = 1.5f;
-
-			// 계단 꼭대기에 정확히 안착
 			if (abs(otherTopY - hitY) < 0.2f && heightDiff > -1.0f && heightDiff <= MAX_STEP_HEIGHT) {
 				Position.y = otherTopY + 1.f; 
 				isfalling = false;
 				fallSpeed = 1.f;
 			}
-			// 계단/경사면을 밟고 있음
 			else if (heightDiff > -1.0f && heightDiff <= MAX_STEP_HEIGHT) {
 				Position.y += heightDiff;
 				isfalling = false;
 				fallSpeed = 1.f;
 			}
-			// 계단 옆/뒷면에 부딪힌 상황 
 			else if (heightDiff > MAX_STEP_HEIGHT) {
-				Position = m_PrevPosition;
+				isSideCollision = true;
+			}
+		}
+
+		if (isSideCollision) {
+			Position = m_PrevPosition;
+			UpdateLocation();
+			int escapeCount = 0;
+			while (otherOBB.Intersects(GetWorldBoundingBox()) && escapeCount < 10) {
+				XMVECTOR stairCenter = XMLoadFloat3(&otherOBB.Center);
+				XMVECTOR playerPos = XMLoadFloat3(&Position);
+				
+				XMVECTOR pushDir = XMVectorSubtract(playerPos, stairCenter);
+				pushDir = XMVectorSetY(pushDir, 0.0f);
+				
+				if (XMVectorGetX(XMVector3LengthSq(pushDir)) < 0.0001f) 
+					pushDir = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+				else 
+					pushDir = XMVector3Normalize(pushDir);
+				
+				playerPos = XMVectorAdd(playerPos, XMVectorScale(pushDir, 0.2f));
+				XMStoreFloat3(&Position, playerPos);
+				UpdateLocation();
+				escapeCount++;
 			}
 		}
 	}
@@ -210,6 +238,10 @@ void CPlayer::Fire() {
 	bullet->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
 	
 	AddChild(bullet);
+}
+
+void CPlayer::Dash(float speed) {
+	MoveSpeed = speed;
 }
 
 void CPlayer::AddChild(std::shared_ptr<CGameObject> pChild) {

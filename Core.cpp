@@ -277,22 +277,17 @@ void Core::FrameAdvance() {
 
 	SceneType nextScene = m_SceneManager.CheckNextScene();
 	if (nextScene != SceneType::NONE) {
-		// GPU 명령어 기록 준비
 		m_pd3dCommandAllocator->Reset();
 		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-		// 실제로 씬을 변경 (Enter -> BuildObjects 순으로 실행되며 CommandList에 메쉬 생성 기록이 남음)
 		m_SceneManager.ChangeSceneByType(nextScene);
 
-		// 기록된 명령을 닫고 GPU에 전송
 		m_pd3dCommandList->Close();
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
-		// 애셋이 GPU 메모리에 모두 올라갈 때까지(씬 로딩 완료) 대기
 		WaitForGpuComplete();
 
-		// 이번 프레임의 렌더링은 건너뜀
 		return;
 	}
 
@@ -319,7 +314,6 @@ void Core::FrameAdvance() {
 
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-	//if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 	m_SceneManager.Rendering(m_pd3dCommandList);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -363,7 +357,6 @@ void Core::BuildObjects() {
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
-	//그래픽 명령 리스트들이 모두 실행될 때까지 기다린다.
 	WaitForGpuComplete();
 }
 
