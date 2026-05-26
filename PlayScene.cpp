@@ -17,7 +17,6 @@ void CPlayScene::Exit() {
 }
 
 void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, std::shared_ptr<CShader> pShader) {
-
 	// ¸Ê ÀúÀå ÆÄÀÏ ÀÐ¾î¿À±â
 	std::ifstream file;
 	if (GetStageNum() == 1) file.open("map1.txt");
@@ -33,67 +32,6 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 		}
 		if (!row.empty()) mapData.push_back(row);
 	}
-
-	// ¸Þ½¬ »ý¼º
-	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
-	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
-	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
-	std::shared_ptr<CMesh> StairMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f * ROOT2, 10.f * ROOT2));
-	
-	// ¸Ê »ý¼º
-	for (int i = 0; i < mapData.size(); i++) {
-		for (int j = 0; j < mapData[i].size(); j++) {
-			XMFLOAT3 position = XMFLOAT3(j * 10.f, 0.f, i * -10.f);
-			if (mapData[i][j] == 1) {
-				std::shared_ptr<CGameObject> pWall = std::make_shared<CGameObject>(WallMesh, pShader,
-					XMFLOAT3(position.x, 8.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
-				if (GetStageNum() == 1) pWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
-				else pWall->SetColor(XMFLOAT4(0.5f, 0.f, 0.f, 1.f));
-				AddGameObject(pWall);
-			}
-			else if (mapData[i][j] == 2) {
-				std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
-					XMFLOAT3(position.x, 3.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
-				if (GetStageNum() == 1) pSWall->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
-				else pSWall->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
-				AddGameObject(pSWall);
-			}
-			else if (mapData[i][j] == 3) {
-				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x, - 2.f, position.z + 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
-				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
-				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
-				AddGameObject(pStair);
-			}
-			else if (mapData[i][j] == 4) {
-				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x + 5.f, - 2.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
-				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
-				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
-				AddGameObject(pStair);
-			}
-			else if (mapData[i][j] == 5) {
-				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x, - 2.f, position.z - 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
-				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
-				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
-				AddGameObject(pStair);
-			}
-			else if (mapData[i][j] == 6) {
-				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
-					XMFLOAT3(position.x - 5.f, - 2.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
-				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
-				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
-				AddGameObject(pStair);
-			}
-			// ¹Ù´ÚÀº ¸Ê ÀüÃ¼¿¡ ±ò¾ÆÁÖ±â
-			std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
-				XMFLOAT3(position.x, - 2.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
-			if (GetStageNum() == 1) pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
-			else pPlane->SetColor(XMFLOAT4(1.f, 0.75f, 0.75f, 1.f));
-			AddGameObject(pPlane);
-		}
-	}
 }
 
 void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* GraphicsRootSignature) {
@@ -104,9 +42,13 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	std::shared_ptr<CMesh> PlayerMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(1.f, 2.f, 1.f));
 	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCrosshairMesh>(Device, CommandList);
 	std::shared_ptr<CMesh> BulletMesh = std::make_shared<CObjMesh>(Device, CommandList, "Sphere.obj");
+	std::shared_ptr<CMesh> PlaneMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 0.f, 10.f));
+	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
+	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
+	std::shared_ptr<CMesh> StairMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f * ROOT2, 10.f * ROOT2));
+	std::shared_ptr<CMesh> KeyMesh = std::make_shared<CObjMesh>(Device, CommandList, "Key.obj");
 	std::shared_ptr<CMesh> StartMesh = std::make_shared<CObjMesh>(Device, CommandList, "Start.obj");
 	std::shared_ptr<CMesh> ExitMesh = std::make_shared<CObjMesh>(Device, CommandList, "Exit.obj");
-	std::shared_ptr<CMesh> KeyMesh = std::make_shared<CObjMesh>(Device, CommandList, "Key.obj");
 
 	// ½¦ÀÌ´õ »ý¼º
 	std::shared_ptr<CShader> pShader = std::make_shared<CShader>();
@@ -128,45 +70,84 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	// ¸Ê »ý¼º
 	CreateMap(Device, CommandList, pShader);
 
+	// ¸Ê »ý¼º
+	for (int i = 0; i < mapData.size(); i++) {
+		for (int j = 0; j < mapData[i].size(); j++) {
+			XMFLOAT3 position = XMFLOAT3(j * 10.f, 0.f, i * -10.f);
+			if (mapData[i][j] == 1) {
+				std::shared_ptr<CGameObject> pWall = std::make_shared<CGameObject>(WallMesh, pShader,
+					XMFLOAT3(position.x, 8.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+				if (GetStageNum() == 1) pWall->SetColor(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.f));
+				else pWall->SetColor(XMFLOAT4(0.5f, 0.f, 0.f, 1.f));
+				AddGameObject(pWall);
+			}
+			else if (mapData[i][j] == 2) {
+				std::shared_ptr<CGameObject> pSWall = std::make_shared<CGameObject>(SWallMesh, pShader,
+					XMFLOAT3(position.x, 3.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::WALL);
+				if (GetStageNum() == 1) pSWall->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pSWall->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pSWall);
+			}
+			else if (mapData[i][j] == 3) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					XMFLOAT3(position.x, -2.f, position.z + 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 4) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					XMFLOAT3(position.x + 5.f, -2.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 5) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					XMFLOAT3(position.x, -2.f, position.z - 5.f), XMFLOAT3(45.f, 0.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 6) {
+				std::shared_ptr<CGameObject> pStair = std::make_shared<CGameObject>(StairMesh, pShader,
+					XMFLOAT3(position.x - 5.f, -2.f, position.z), XMFLOAT3(45.f, 90.f, 0.f), ObjectType::STAIR);
+				if (GetStageNum() == 1) pStair->SetColor(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.f));
+				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
+				AddGameObject(pStair);
+			}
+			else if (mapData[i][j] == 7) {
+				std::shared_ptr<CGameObject> pEnemy = std::make_shared<CEnemy>(PlayerMesh, pShader,
+					XMFLOAT3(position.x, -1.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ENEMY, m_Player);
+				pEnemy->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
+				AddGameObject(pEnemy);
+			}
+			else if (mapData[i][j] == 8) {
+				std::shared_ptr<CGameObject> pExit = std::make_shared<CFloatingObject>(ExitMesh, pShader,
+					XMFLOAT3(position.x, 0.f, position.z), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::EXIT);
+				pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
+				AddGameObject(pExit);
+			}
+			else if (mapData[i][j] == 9) {
+				std::shared_ptr<CGameObject> pItem = std::make_shared<CFloatingObject>(KeyMesh, pShader,
+					XMFLOAT3(position.x, -1.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
+				pItem->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
+				AddGameObject(pItem);
+			}
+			// ¹Ù´ÚÀº ¸Ê ÀüÃ¼¿¡ ±ò¾ÆÁÖ±â
+			std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
+				XMFLOAT3(position.x, -2.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
+			if (GetStageNum() == 1) pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
+			else pPlane->SetColor(XMFLOAT4(1.f, 0.75f, 0.75f, 1.f));
+			AddGameObject(pPlane);
+		}
+	}
+
 	// ½ÃÀÛ ¶ç¿ì±â
 	std::shared_ptr<CGameObject> pStart = std::make_shared<CFloatingObject>(StartMesh, pShader,
 		XMFLOAT3(60.f, 0.f, -58.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::START);
 	pStart->SetColor(XMFLOAT4(1.f, 0.f, 0.f, 1.f));
 	AddGameObject(pStart);
-
-	// Á¾·á ¶ç¿ì±â
-	std::shared_ptr<CGameObject> pExit = std::make_shared<CFloatingObject>(ExitMesh, pShader,
-		XMFLOAT3(110.f, 0.f, -110.f), XMFLOAT3(0.f, 180.f, 0.f), ObjectType::EXIT);
-	mapData[11][11] = 8;
-	pExit->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
-	AddGameObject(pExit);
-
-	// ¿­¼è ¶ç¿ì±â
-	int x, z;
-	do {
-		x = FIELD_RANDOM;
-		z = FIELD_RANDOM;
-	} while (mapData[z][x] != 0);
-	mapData[z][x] = 9;
-	std::shared_ptr<CGameObject> pKey = std::make_shared<CFloatingObject>(KeyMesh, pShader,
-		XMFLOAT3(x * 10.f, 0.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
-	pKey->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
-	AddGameObject(pKey);
-
-	// Àû °´Ã¼ »ý¼º (m_Player¸¦ Å¸°ÙÀ¸·Î Ãß°¡ Àü´Þ)
-	for (int i = 0; i < 5; i++) {
-		// ÀûÀº ¸Êµ¥ÀÌÅÍÀÇ 0 À§Ä¡¿¡¼­ ·£´ýÇÏ°Ô »ý¼º
-		int x, z;
-		do {
-			x = FIELD_RANDOM;
-			z = FIELD_RANDOM;
-		} while (mapData[z][x] != 0);
-		mapData[z][x] = 7;
-		std::shared_ptr<CGameObject> pEnemy = std::make_shared<CEnemy>(PlayerMesh, pShader,
-			XMFLOAT3(x * 10.f, -1.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ENEMY, m_Player);
-		pEnemy->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
-		AddGameObject(pEnemy);
-	}
 }
 
 void CPlayScene::AnimateObjects(float time) {
