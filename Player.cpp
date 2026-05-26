@@ -32,7 +32,9 @@ void CPlayer::UpdateLocation() {
 	SetWorldMatrix();
 
 	for (auto& child : m_Children) {
-		child->SetParentWorldMatrix(WorldMatrix);
+		if (child->GetType() != ObjectType::BULLET) {
+			child->SetParentWorldMatrix(WorldMatrix);
+		}
 		child->SetWorldMatrix();
 	}
 }
@@ -48,7 +50,7 @@ void CPlayer::Move(int dir) {
 		moveVec = XMFLOAT3(-direction.z, direction.y, direction.x);
 		moveSign = (dir == -2) ? 1 : -1;
 	}
-	
+
 	CGameObject::Move(moveVec.x * moveSign * MoveSpeed, moveVec.y * moveSign * MoveSpeed, moveVec.z * moveSign * MoveSpeed);
 
 	UpdateLocation();
@@ -74,6 +76,18 @@ void CPlayer::Animate(float time) {
 		Position.y -= fallSpeed * time;
 		fallSpeed += 9.8f * time; // 중력 가속도 적용
 	}
+
+	for (auto& child : m_Children) {
+		child->Animate(time);
+	}
+
+	m_Children.erase(
+		std::remove_if(m_Children.begin(), m_Children.end(),
+			[](const std::shared_ptr<CGameObject>& child) {
+				return child->isdead;
+			}),
+		m_Children.end()
+	);
 
 	UpdateLocation();
 
@@ -182,6 +196,20 @@ void CPlayer::TransPersonView() {
 			Position.y + cameraDistance / 2.f, Position.z - direction.z * cameraDistance);
 		m_pCamera->SetViewMatrix();
 	}
+}
+
+void CPlayer::SetBullet(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader) {
+	m_BulletMesh = pMesh;
+	m_BulletShader = pShader;
+}
+
+void CPlayer::Fire() {
+	// 총알 생성 
+	std::shared_ptr<CGameObject> bullet = std::make_shared<CBullet>(m_BulletMesh, m_BulletShader,
+		XMFLOAT3(0.f, 0.f, 2.5f), Rotation, ObjectType::BULLET, XMFLOAT3(0.f, 0.f, 1.f));
+	bullet->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
+	
+	AddChild(bullet);
 }
 
 void CPlayer::AddChild(std::shared_ptr<CGameObject> pChild) {

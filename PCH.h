@@ -66,7 +66,7 @@ inline int Random() {
 
 inline int FieldRandom() {
 	static std::default_random_engine dre{ std::random_device{}() };
-	static std::uniform_int_distribution<int> uid(0, 7);
+	static std::uniform_int_distribution<int> uid(0, 12);
 	return uid(dre);
 }
 

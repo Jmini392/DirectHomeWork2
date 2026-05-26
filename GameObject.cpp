@@ -66,3 +66,42 @@ void CGameObject::Animate(float time) {
 		SetWorldMatrix();
 	}
 }
+
+CBullet::CBullet(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+	XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type, XMFLOAT3 direction) {
+	mesh = pMesh;
+	shader = pShader;
+	Position = position;
+	Rotation = rotation;
+	Type = type;
+	Direction = direction;
+	Speed = 15.f; // 총알 이동 속도 설정
+	LifeTime = 1.f; // 총알 수명 설정
+}
+
+void CBullet::Animate(float time) {
+	if (isdead) return;
+
+	// 총알 이동
+	Position.x += Direction.x * Speed * time;
+	Position.y += Direction.y * Speed * time;
+	Position.z += Direction.z * Speed * time;
+
+	// 수명 감소
+	LifeTime -= time;
+	if (LifeTime <= 0.f) {
+		isdead = true; // 수명이 다하면 총알 제거
+	}
+}
+
+void CBullet::OnCollision(std::shared_ptr<CGameObject> pOther) {
+	if (pOther->GetType() == ObjectType::ENEMY) {
+		isdead = true; // 총알 제거
+	}
+	else if (pOther->GetType() == ObjectType::WALL) {
+		isdead = true; // 총알 제거
+	}
+	else if (pOther->GetType() == ObjectType::STAIR) {
+		isdead = true; // 총알 제거
+	}
+}

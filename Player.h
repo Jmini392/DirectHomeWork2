@@ -23,8 +23,11 @@ public:
 	virtual void OnCollision(std::shared_ptr<CGameObject> pOther) override;
 
 	void TransPersonView();
+	void SetBullet(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader);
+	void Fire();
 
 	void AddChild(std::shared_ptr<CGameObject> pChild);
+	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return m_Children; }
 	virtual void Draw(ID3D12GraphicsCommandList* CommandList);
 protected:
 	// 플레이어에게 부착된 자식 오브젝트들을 저장하는 리스트
@@ -40,4 +43,7 @@ private:
 	float MoveSpeed = 0.1f; // 이동 속도
 
 	bool isFirstPersonView = true; // 1인칭 시점 여부
+
+	std::shared_ptr<CMesh> m_BulletMesh;
+	std::shared_ptr<CShader> m_BulletShader;
 };

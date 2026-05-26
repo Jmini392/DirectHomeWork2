@@ -69,3 +69,17 @@ public:
 
 	bool isdead = false;
 };
+
+class CBullet : public CGameObject {
+public:
+	CBullet() {}
+	CBullet(std::shared_ptr<CMesh> pMesh, std::shared_ptr<CShader> pShader,
+		XMFLOAT3 position, XMFLOAT3 rotation, ObjectType type, XMFLOAT3 direction);
+	~CBullet() {}
+	void Animate(float time) override;
+	void OnCollision(std::shared_ptr<CGameObject> pOther) override;
+private:
+	XMFLOAT3 Direction;
+	float Speed;
+	float LifeTime;
+};

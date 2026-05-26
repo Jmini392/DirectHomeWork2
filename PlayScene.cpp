@@ -19,7 +19,6 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 		return;
 	}
 	std::string line;
-	std::vector<std::vector<int>> mapData;
 	while (std::getline(file, line)) {
 		std::vector<int> row;
 		for (char c : line) {
@@ -33,7 +32,6 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 	std::shared_ptr<CMesh> WallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 20.f, 10.f));
 	std::shared_ptr<CMesh> SWallMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f, 10.f));
 	std::shared_ptr<CMesh> StairMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(10.f, 10.f * ROOT2, 10.f * ROOT2));
-	//std::shared_ptr<CMesh> StairMesh = std::make_shared<CStairMesh>(Device, CommandList);
 	
 	// 맵 생성
 	for (int i = 0; i < mapData.size(); i++) {
@@ -81,13 +79,12 @@ void CPlayScene::CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* Comm
 				else pStair->SetColor(XMFLOAT4(1.f, 0.5f, 0.5f, 1.f));
 				AddGameObject(pStair);
 			}
-			else {
-				std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
-					XMFLOAT3(position.x, position.y - 5.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
-				if (GetStageNum() == 1) pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
-				else pPlane->SetColor(XMFLOAT4(1.f, 0.75f, 0.75f, 1.f));
-				AddGameObject(pPlane);
-			}
+			// 바닥은 맵 전체에 깔아주기
+			std::shared_ptr<CGameObject> pPlane = std::make_shared<CGameObject>(PlaneMesh, pShader,
+				XMFLOAT3(position.x, position.y - 5.f, position.z), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::FLOOR);
+			if (GetStageNum() == 1) pPlane->SetColor(XMFLOAT4(0.75f, 0.75f, 0.75f, 1.f));
+			else pPlane->SetColor(XMFLOAT4(1.f, 0.75f, 0.75f, 1.f));
+			AddGameObject(pPlane);
 		}
 	}
 }
@@ -99,6 +96,7 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	// 메쉬 생성
 	std::shared_ptr<CMesh> PlayerMesh = std::make_shared<CCubeMesh>(Device, CommandList, XMFLOAT3(1.f, 2.f, 1.f));
 	std::shared_ptr<CMesh> CrossMesh = std::make_shared<CCrosshairMesh>(Device, CommandList);
+	std::shared_ptr<CMesh> BulletMesh = std::make_shared<CObjMesh>(Device, CommandList, "Sphere.obj");
 	std::shared_ptr<CMesh> StartMesh = std::make_shared<CObjMesh>(Device, CommandList, "Start.obj");
 	std::shared_ptr<CMesh> ExitMesh = std::make_shared<CObjMesh>(Device, CommandList, "Exit.obj");
 	std::shared_ptr<CMesh> KeyMesh = std::make_shared<CObjMesh>(Device, CommandList, "Key.obj");
@@ -111,6 +109,7 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 	m_Player = std::make_shared<CPlayer>(PlayerMesh, pShader,
 		XMFLOAT3(60.f, 0.f, -60.f), XMFLOAT3(0.f, 0.f, 0.f), m_Camera.get());
 	m_Player->SetColor(XMFLOAT4(0.f, 0.f, 1.f, 1.f));
+	m_Player->SetBullet(BulletMesh, pShader);
 	AddGameObject(m_Player);
 
 	// 조준선 객체 생성
@@ -139,6 +138,20 @@ void CPlayScene::BuildObjects(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 		XMFLOAT3(60.f, 0.f, -48.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ITEM);
 	pKey->SetColor(XMFLOAT4(1.f, 1.f, 0.f, 1.f));
 	AddGameObject(pKey);
+
+	// 적 객체 생성
+	for (int i = 0; i < 5; i++) {
+		// 적은 맵데이터의 0 위치에서 랜덤하게 생성
+		int x, z;
+		do {
+			x = FIELD_RANDOM;
+			z = FIELD_RANDOM;
+		} while (mapData[z][x] != 0);
+		std::shared_ptr<CGameObject> pEnemy = std::make_shared<CEnemy>(PlayerMesh, pShader,
+			XMFLOAT3(x * 10.f, 0.f, z * -10.f), XMFLOAT3(0.f, 0.f, 0.f), ObjectType::ENEMY);
+		pEnemy->SetColor(XMFLOAT4(0.f, 1.f, 0.f, 1.f));
+		AddGameObject(pEnemy);
+	}
 }
 
 void CPlayScene::AnimateObjects(float time) {
@@ -152,6 +165,26 @@ void CPlayScene::AnimateObjects(float time) {
 }
 
 void CPlayScene::CollisionCheck() {
+	// 예외처리: 플레이어가 유효할 때만 실행
+	if (m_Player) {
+		auto& playerChildren = m_Player->GetChildren();
+
+		for (auto& child : playerChildren) {
+			// 총알이면서 아직 살아있는 경우에만 검사
+			if (child->GetType() == ObjectType::BULLET && !child->isdead) {
+				BoundingOrientedBox bulletOBB = child->GetWorldBoundingBox();
+				for (auto& obj : m_GameObjects) {
+					// 벽, 계단, 적 만 충돌 검사
+					if (obj->GetType() == ObjectType::WALL || obj->GetType() == ObjectType::STAIR || obj->GetType() == ObjectType::ENEMY) {
+						if (bulletOBB.Intersects(obj->GetWorldBoundingBox())) {
+							child->OnCollision(obj);
+							obj->OnCollision(child);
+						}
+					}
+				}
+			}
+		}
+	}
 	for (size_t i = 0; i < m_GameObjects.size(); ++i) {
 		auto& obj1 = m_GameObjects[i];
 		for (size_t j = i + 1; j < m_GameObjects.size(); ++j) {
@@ -224,6 +257,9 @@ void CPlayScene::KeyboardProcessing(HWND hWnd, UINT nMessageID, WPARAM wParam, L
 		switch (wParam) {
 		case 'C':
 			m_Player->TransPersonView();
+			break;
+		case VK_SHIFT:
+			m_Player->Fire();
 			break;
 		case VK_ESCAPE:
 			// ESC 키를 누르면 캡처를 풀도록 변경 (선택사항)

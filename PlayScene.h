@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "Enemy.h"
 
 class CPlayScene : public CScene {
 public:
@@ -30,6 +31,7 @@ public:
 	void CreateMap(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, std::shared_ptr<CShader> pShader);
 private:
 	int stageNum = 0;
+	std::vector<std::vector<int>> mapData = {};
 
 	std::shared_ptr<CPlayer> m_Player = nullptr;
 	std::unique_ptr<CCamera> m_Camera = nullptr;
